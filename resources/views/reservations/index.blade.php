@@ -57,16 +57,31 @@
                 @foreach($reservations as $reservation)
                 <div class="reservation-item">
                     <div class="reservation-header">
-                        <div class="reservation-field">{{ $reservation['field_name'] }}</div>
-                        <div class="reservation-price">Rp {{ number_format($reservation['total_price'], 0, ',', '.') }}</div>
+                        <div class="reservation-field">{{ $reservation->lapangan ? $reservation->lapangan->name : 'Lapangan tidak ditemukan' }}</div>
+                        <div class="reservation-price">Rp {{ number_format($reservation->total_harga_232112, 0, ',', '.') }}</div>
                     </div>
                     <div class="reservation-details">
-                        📅 {{ $reservation['date'] }} | ⏰ {{ $reservation['start_time'] }} ({{ $reservation['duration'] }} jam)
+                        📅 {{ $reservation->tanggal_reservasi_232112 }} | ⏰ {{ $reservation->waktu_mulai_232112 }} - {{ $reservation->waktu_selesai_232112 }}
+                        @if($reservation->pembayaran->isNotEmpty())
+                            | 💳 {{ $reservation->pembayaran->first()->metode_pembayaran_232112 }}
+                        @endif
                     </div>
-                    @if($reservation['status'] == 'confirmed')
+                    @if($reservation->status_reservasi_232112 == 'confirmed')
                         <span class="reservation-status status-confirmed">Confirmed</span>
+                    @elseif($reservation->status_reservasi_232112 == 'cancelled')
+                        <span class="reservation-status" style="background: #f8d7da; color: #721c24;">Cancelled</span>
+                    @elseif($reservation->status_reservasi_232112 == 'completed')
+                        <span class="reservation-status" style="background: #d1ecf1; color: #0c5460;">Completed</span>
                     @else
                         <span class="reservation-status status-pending">Pending</span>
+                    @endif
+                    
+                    @if($reservation->pembayaran->isNotEmpty())
+                        @if($reservation->pembayaran->first()->status_pembayaran_232112 == 'paid')
+                            <span class="reservation-status status-confirmed">Paid</span>
+                        @else
+                            <span class="reservation-status status-pending">Payment Pending</span>
+                        @endif
                     @endif
                 </div>
                 @endforeach

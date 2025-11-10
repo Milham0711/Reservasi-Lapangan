@@ -297,6 +297,9 @@
                 </div>
                 <div class="summary-section">
                     <div class="summary-title">📋 Ringkasan Pesanan</div>
+                        <div style="text-align:center; margin-bottom:12px;">
+                            <img id="summaryImage" src="{{ asset('images/placeholder-field.svg') }}" alt="Lapangan" style="width:100%;max-width:320px;border-radius:8px;display:block;margin:0 auto;" />
+                        </div>
                     
                     <div class="summary-item">
                         <div class="summary-label">Lapangan:</div>
@@ -339,42 +342,65 @@
                 </div>
             </div>
             
-            <div class="action-buttons">
-                <button type="submit" form="reservationForm" class="btn btn-primary">
-                    💳 Lanjutkan Pembayaran
-                </button>
-                <a href="{{ route('user.dashboard') }}" class="btn btn-secondary">
-                    ↩️ Kembali ke Dashboard
-                </a>
-            </div>
+                <div class="action-buttons">
+                    <button type="submit" form="reservationForm" class="btn btn-primary">
+                        💳 Buat Reservasi & Lanjutkan Pembayaran
+                    </button>
+                    <a href="{{ route('user.dashboard') }}" class="btn btn-secondary">
+                        ↩️ Kembali ke Dashboard
+                    </a>
+                </div>
         </div>
     </div>
 
     <script>
-        const fields = {
-            futsal: [
-                { 
-                    id: 'futsal_vinyl', 
-                    name: 'Lapangan Vinyl Futsal',  
-                    price: 50000  
-                },
-                { 
-                    id: 'futsal_sintetis', 
-                    name: 'Lapangan Sintetis Futsal',  
-                    price: 40000 
-                }
-            ],
-            badminton: [
-                { id: 'badminton_1', name: 'Badminton 1', price: 80000 },
-                { id: 'badminton_2', name: 'Badminton 2', price: 80000 },
-                { id: 'badminton_3', name: 'Badminton 3', price: 80000 }
-            ]
+        // Fields will be loaded from database
+        let fields = {
+            futsal: [],
+            badminton: []
         };
+
+    // Prefill data passed from controller when user clicks "Buat Reservasi" on a location
+    const prefill = @json($prefill ?? null);
+    // If prefill includes an image path, convert to full asset URL here so JS can use it
+    const prefillImageUrl = @json(isset($prefill['image']) && $prefill['image'] ? asset($prefill['image']) : null);
 
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Page loaded - initializing fields');
-            
+
             updateFields();
+
+            // If controller provided a prefill location, set sport type and inject the specific field
+            if (prefill) {
+                try {
+                    if (prefill.type) {
+                        const sportTypeEl = document.getElementById('sportType');
+                        if (sportTypeEl) sportTypeEl.value = prefill.type;
+                    }
+
+                    const fieldSelect = document.getElementById('fieldSelect');
+                    if (fieldSelect) {
+                        // create option that represents the prefilling lapangan
+                        const opt = document.createElement('option');
+                        opt.value = prefill.id;
+                        opt.textContent = `${prefill.name} - Rp ${Number(prefill.price).toLocaleString()}/jam`;
+                        opt.setAttribute('data-price', prefill.price);
+                        opt.setAttribute('data-name', prefill.name);
+                        // replace options with this single prefilling option and select it
+                        fieldSelect.innerHTML = '';
+                        fieldSelect.appendChild(opt);
+                        fieldSelect.value = prefill.id;
+
+                        // Set image in summary when prefill provided
+                        const summaryImg = document.getElementById('summaryImage');
+                        if (summaryImg) {
+                            summaryImg.src = prefillImageUrl || summaryImg.src;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error applying prefill:', e);
+                }
+            }
             
             document.getElementById('sportType').addEventListener('change', updateFields);
             document.getElementById('fieldSelect').addEventListener('change', updateSummary);
@@ -392,7 +418,7 @@
             updateSummary();
         });
 
-        function updateFields() {
+        async function updateFields() {
             console.log('updateFields called');
             const sportType = document.getElementById('sportType').value;
             const fieldSelect = document.getElementById('fieldSelect');
@@ -406,9 +432,53 @@
             
             fieldSelect.innerHTML = '<option value="">-- Pilih Lapangan --</option>';
             
-            if (sportType && fields[sportType]) {
-                console.log('Fields found:', fields[sportType]);
-                fields[sportType].forEach(field => {
+            if (sportType) {
+                try {
+                    // Load fields from database
+                    const response = await fetch(`/api/fields/${sportType}`);
+                    if (response.ok) {
+                        const fieldsData = await response.json();
+                        fields[sportType] = fieldsData;
+                        console.log('Fields loaded from database:', fieldsData);
+                        
+                        fieldsData.forEach(field => {
+                            const option = document.createElement('option');
+                            option.value = field.id;
+                            option.textContent = `${field.name} - Rp ${field.price.toLocaleString()}/jam`;
+                            option.setAttribute('data-price', field.price);
+                            option.setAttribute('data-name', field.name);
+                            fieldSelect.appendChild(option);
+                        });
+                    } else {
+                        console.error('Failed to load fields from database');
+                        // Fallback to hardcoded data if API fails
+                        loadFallbackFields(sportType, fieldSelect);
+                    }
+                } catch (error) {
+                    console.error('Error loading fields:', error);
+                    // Fallback to hardcoded data if API fails
+                    loadFallbackFields(sportType, fieldSelect);
+                }
+            }
+            
+            updateSummary();
+        }
+
+        function loadFallbackFields(sportType, fieldSelect) {
+            const fallbackFields = {
+                futsal: [
+                    { id: '1', name: 'Lapangan Vinyl Futsal', price: 50000 },
+                    { id: '2', name: 'Lapangan Sintetis Futsal', price: 40000 }
+                ],
+                badminton: [
+                    { id: '3', name: 'Badminton 1', price: 80000 },
+                    { id: '4', name: 'Badminton 2', price: 80000 },
+                    { id: '5', name: 'Badminton 3', price: 80000 }
+                ]
+            };
+            
+            if (fallbackFields[sportType]) {
+                fallbackFields[sportType].forEach(field => {
                     const option = document.createElement('option');
                     option.value = field.id;
                     option.textContent = `${field.name} - Rp ${field.price.toLocaleString()}/jam`;
@@ -416,11 +486,7 @@
                     option.setAttribute('data-name', field.name);
                     fieldSelect.appendChild(option);
                 });
-            } else {
-                console.log('No fields for sport type:', sportType);
             }
-            
-            updateSummary();
         }
 
         function updateSummary() {

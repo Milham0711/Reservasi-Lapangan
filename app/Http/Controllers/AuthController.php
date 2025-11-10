@@ -73,13 +73,49 @@ class AuthController extends Controller
             'user_type' => 'required|in:user,admin'
         ]);
 
-        $userType = $request->user_type;
         $email = $request->email;
         $password = $request->password;
-        
+
+        // First try to authenticate against database users
+        try {
+            if (class_exists('\App\Models\UserLegacy')) {
+                $user = \App\Models\UserLegacy::where('email_232112', $email)->first();
+
+                if ($user && \Illuminate\Support\Facades\Hash::check($password, $user->password_232112)) {
+                    // Map database role to session role
+                    $sessionRole = $user->role_232112 === 'user' ? 'user' : $user->role_232112;
+
+                    Session::put('user', [
+                        'id' => $user->user_id_232112,
+                        'email' => $user->email_232112,
+                        'name' => $user->nama_232112,
+                        'role' => $sessionRole,
+                        'phone' => $user->telepon_232112,
+                        'logged_in' => true,
+                        'is_temporary' => false
+                    ]);
+
+                    $notificationController = new NotificationController();
+                    $notificationController->sendNotification(
+                        $user->email_232112,
+                        'Login Berhasil',
+                        'Halo ' . $user->nama_232112 . '! Anda berhasil login ke SportVenue.',
+                        'email'
+                    );
+
+                    return redirect()->route($sessionRole . '.dashboard');
+                }
+            }
+        } catch (\Exception $e) {
+            // If DB authentication fails, fall back to hardcoded users
+        }
+
+        // Fallback to hardcoded users if DB is not available or user not found
+        $userType = $request->user_type;
+
         if (isset($this->users[$userType])) {
             $user = $this->users[$userType];
-            
+
             if ($email === $user['email'] && $password === $user['password']) {
                 Session::put('user', [
                     'email' => $user['email'],
@@ -128,7 +164,18 @@ class AuthController extends Controller
             return redirect()->route('admin.dashboard')->with('error', 'Akses ditolak!');
         }
 
-        return view('user.dashboard', ['user' => $user]);
+        // Load lapangan locations from legacy table and pass to view
+        try {
+            $locations = [];
+            if (class_exists('\App\\Models\\Lapangan')) {
+                $locations = \App\Models\Lapangan::where('status_232112', 'active')->get();
+            }
+        } catch (\Exception $e) {
+            // If DB is not available or query fails, fallback to empty array
+            $locations = [];
+        }
+
+        return view('user.dashboard', ['user' => $user, 'locations' => $locations]);
     }
 
     public function adminDashboard()

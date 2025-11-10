@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1">
+      <stop offset="0" stop-color="#667eea"/>
+      <stop offset="1" stop-color="#764ba2"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#g)"/>
+  <g fill="#ffffff" font-family="Segoe UI, Roboto, Arial" text-anchor="middle">
+    <text x="50%" y="45%" font-size="48" font-weight="700">Gambar Lapangan</text>
+    <text x="50%" y="55%" font-size="20" opacity="0.9">Belum ada gambar. Gunakan placeholder ini.</text>
+  </g>
+</svg>

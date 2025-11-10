@@ -1,0 +1,410 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", sans-serif;
+}
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.navbar {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 1rem 2rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.navbar-brand h1 {
+    color: #2d3748;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+.user-info {
+    text-align: right;
+    color: #4a5568;
+}
+.user-info .welcome {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    color: white;
+}
+.dashboard-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+.dashboard-header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.sports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.sport-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+.sport-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1.5rem;
+    color: white;
+}
+.futsal-icon {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+}
+.badminton-icon {
+    background: linear-gradient(135deg, #4ecdc4, #44a08d);
+}
+.sport-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2d3748;
+}
+.sport-subtitle {
+    color: #718096;
+    font-size: 0.9rem;
+}
+
+.field-list {
+    margin-top: 1rem;
+}
+.field-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f7fafc;
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    border-left: 4px solid #4299e1;
+}
+.field-name {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+}
+.field-details {
+    font-size: 0.85rem;
+    color: #718096;
+}
+.field-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+.status-available {
+    background: #c6f6d5;
+    color: #276749;
+}
+.status-booked {
+    background: #fed7d7;
+    color: #c53030;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+.reservation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+.reservation-card {
+    background: #f7fafc;
+    padding: 1.5rem;
+    border-radius: 15px;
+    border-left: 4px solid #4299e1;
+}
+.reservation-sport {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+.reservation-details {
+    color: #718096;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+.reservation-status {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #bee3f8;
+    color: #2c5282;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+.alert-info {
+    background: rgba(144, 205, 244, 0.2);
+    color: #2c5282;
+    border: 1px solid #bee3f8;
+}
+
+@media (max-width: 768px) {
+    .sports-grid,
+    .reservation-grid {
+        grid-template-columns: 1fr;
+    }
+    .navbar {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    .user-info {
+        text-align: center;
+    }
+    .action-buttons {
+        flex-direction: column;
+    }
+}
+/* Slider styles for lokasi lapangan */
+.slider {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+}
+/* screen-reader only helper */
+.sr-only {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+.slides {
+    display: flex;
+    transition: transform 0.5s ease;
+    will-change: transform;
+}
+.slide {
+    min-width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    color: #2d3748;
+    flex: 0 0 100%;
+}
+.slide img {
+    width: 100%;
+    height: 420px;
+    object-fit: cover;
+    display: block;
+    border-radius: 10px;
+}
+/* hero variant: taller and full-bleed */
+.hero-bleed {
+    width: calc(100% + 40px);
+    margin-left: -20px;
+    margin-right: -20px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+/* make hero banner larger and responsive: use viewport height but cap to a max pixel height */
+.slide-banner {
+    width: 100%;
+    height: min(50vh, 860px);
+    background-size: cover;
+    background-position: center;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+.hero-bleed .slide img {
+    height: 220px;
+    border-radius: 8px;
+}
+/* thumbnails removed: keep compact cards when banner is used as the single image */
+.category-grid .cat-card {
+    padding: 14px 12px;
+    display: block;
+}
+.category-grid .cat-card .cat-title {
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+.category-grid .cat-card .cat-sub {
+    color: #718096;
+    font-size: 0.9rem;
+}
+.slide-caption {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    background: rgba(0, 0, 0, 0.45);
+    color: white;
+    padding: 0.6rem 0.9rem;
+    border-radius: 8px;
+    backdrop-filter: blur(4px);
+}
+.slide-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+.slide-sub {
+    font-size: 0.85rem;
+    opacity: 0.95;
+}
+.slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.55);
+    color: white;
+    border: none;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.5rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    z-index: 10;
+}
+.slider-btn.prev {
+    left: 12px;
+}
+.slider-btn.next {
+    right: 12px;
+}
+.slider-dots {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 12px;
+    align-items: flex-end;
+}
+.slider-dots button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+.slider-dots .dot-mark {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.18);
+    display: block;
+    transition: all 0.25s ease;
+}
+.slider-dots button.active .dot-mark {
+    background: #2d3748;
+    transform: scale(1.15);
+}
+.slider-dots .dot-label {
+    font-size: 0.75rem;
+    color: #2d3748;
+    opacity: 0.85;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+@media (max-width: 480px) {
+    /* small-screen adjustments can go here */
+    .navbar {
+        left: 12px;
+        right: 12px;
+        top: 12px;
+        padding: 0.6rem 0.8rem;
+    }
+    body {
+        padding-top: 100px;
+    }
+    .hero-bleed {
+        margin-left: -12px;
+        margin-right: -12px;
+        width: calc(100% + 24px);
+    }
+}

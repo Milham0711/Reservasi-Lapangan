@@ -58,21 +58,39 @@
                     <tbody>
                         @foreach($reservations as $reservation)
                         <tr>
-                            <td>#{{ $reservation['id'] }}</td>
+                            <td>#{{ $reservation->reservasi_id_232112 }}</td>
                             <td>
-                                <div>{{ $reservation['user_name'] }}</div>
-                                <small style="color: #666;">{{ $reservation['user_email'] }}</small>
+                                <div>User ID: {{ $reservation->user_id_232112 }}</div>
+                                <small style="color: #666;">{{ $reservation->created_at_232112 }}</small>
                             </td>
-                            <td>{{ $reservation['field_name'] }}</td>
-                            <td>{{ $reservation['date'] }}</td>
-                            <td>{{ $reservation['start_time'] }}</td>
-                            <td>{{ $reservation['duration'] }} jam</td>
-                            <td>Rp {{ number_format($reservation['total_price'], 0, ',', '.') }}</td>
+                            <td>{{ $reservation->lapangan ? $reservation->lapangan->name : 'Lapangan tidak ditemukan' }}</td>
+                            <td>{{ $reservation->tanggal_reservasi_232112 }}</td>
+                            <td>{{ $reservation->waktu_mulai_232112 }} - {{ $reservation->waktu_selesai_232112 }}</td>
                             <td>
-                                @if($reservation['status'] == 'confirmed')
+                                @if($reservation->waktu_mulai_232112 && $reservation->waktu_selesai_232112)
+                                    {{ \Carbon\Carbon::parse($reservation->waktu_mulai_232112)->diffInHours(\Carbon\Carbon::parse($reservation->waktu_selesai_232112)) }} jam
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            <td>Rp {{ number_format($reservation->total_harga_232112, 0, ',', '.') }}</td>
+                            <td>
+                                @if($reservation->status_reservasi_232112 == 'confirmed')
                                     <span class="status-confirmed">Confirmed</span>
+                                @elseif($reservation->status_reservasi_232112 == 'cancelled')
+                                    <span style="background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px;">Cancelled</span>
+                                @elseif($reservation->status_reservasi_232112 == 'completed')
+                                    <span style="background: #d1ecf1; color: #0c5460; padding: 4px 8px; border-radius: 4px;">Completed</span>
                                 @else
                                     <span class="status-pending">Pending</span>
+                                @endif
+                                
+                                @if($reservation->pembayaran->isNotEmpty())
+                                    @if($reservation->pembayaran->first()->status_pembayaran_232112 == 'paid')
+                                        <span class="status-confirmed">Paid</span>
+                                    @else
+                                        <span class="status-pending">Payment Pending</span>
+                                    @endif
                                 @endif
                             </td>
                             <td>

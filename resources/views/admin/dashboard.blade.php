@@ -50,19 +50,19 @@
 
         <div class="stats">
             <div class="stat-card">
-                <div class="stat-number">0</div>
+                <div class="stat-number">{{ $totalReservations }}</div>
                 <div>Total Reservasi</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">6</div>
+                <div class="stat-number">{{ $activeFields }}</div>
                 <div>Lapangan Tersedia</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">Rp 0</div>
+                <div class="stat-number">Rp {{ number_format($monthlyRevenue, 0, ',', '.') }}</div>
                 <div>Pendapatan Bulan Ini</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">2</div>
+                <div class="stat-number">{{ $activeUsers }}</div>
                 <div>Member Aktif</div>
             </div>
         </div>
@@ -71,9 +71,10 @@
             <h2>Admin Quick Actions</h2>
             <div class="quick-actions">
                 <a href="{{ route('admin.reservations') }}" class="btn">📋 Kelola Reservasi</a>
-                <a href="#" class="btn" onclick="showComingSoon()">🏟️ Kelola Lapangan</a>
-                <a href="#" class="btn" onclick="showComingSoon()">👥 Kelola Member</a>
-                <a href="#" class="btn" onclick="showComingSoon()">📊 Laporan Keuangan</a>
+                <a href="{{ route('admin.fields') }}" class="btn">🏟️ Kelola Lapangan</a>
+                <a href="{{ route('admin.users') }}" class="btn">👥 Kelola Member</a>
+                <a href="{{ route('admin.payments') }}" class="btn">💰 Kelola Pembayaran</a>
+                <a href="{{ route('admin.reports') }}" class="btn">📊 Laporan Keuangan</a>
                 <a href="#" class="btn" onclick="showComingSoon()">⚙️ Pengaturan Sistem</a>
             </div>
         </div>
@@ -81,8 +82,21 @@
         <div class="card">
             <h2>Reservasi Hari Ini</h2>
             <div class="admin-features">
-                <p><strong>0 Reservasi</strong> untuk hari ini</p>
-                <p style="color: #666; margin-top: 0.5rem;">Belum ada reservasi yang masuk.</p>
+                @if($todayReservations->count() > 0)
+                    <p><strong>{{ $todayReservations->count() }} Reservasi</strong> untuk hari ini</p>
+                    <div style="margin-top: 1rem;">
+                        @foreach($todayReservations as $reservation)
+                            <div style="border-bottom: 1px solid #eee; padding: 0.5rem 0;">
+                                <strong>{{ $reservation->kode_booking_232112 }}</strong> -
+                                {{ $reservation->lapangan->nama_lapangan_232112 ?? 'N/A' }}<br>
+                                <small>{{ $reservation->waktu_mulai_232112 }} - {{ $reservation->waktu_selesai_232112 }} | Status: {{ $reservation->status_reservasi_232112 }}</small>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <p><strong>0 Reservasi</strong> untuk hari ini</p>
+                    <p style="color: #666; margin-top: 0.5rem;">Belum ada reservasi yang masuk.</p>
+                @endif
             </div>
         </div>
 
