@@ -105,7 +105,7 @@ class AdminController extends Controller
 
         $request->validate([
             'nama_lapangan_232112' => 'required|string|max:255',
-            'jenis_olahraga_232112' => 'required|string|max:100',
+            'jenis_lapangan_232112' => 'required|string|max:100',
             'harga_per_jam_232112' => 'required|numeric|min:0',
             'kapasitas_232112' => 'required|integer|min:1',
             'deskripsi_232112' => 'nullable|string',
@@ -152,7 +152,7 @@ class AdminController extends Controller
 
         $request->validate([
             'nama_lapangan_232112' => 'required|string|max:255',
-            'jenis_olahraga_232112' => 'required|string|max:100',
+            'jenis_lapangan_232112' => 'required|string|max:100',
             'harga_per_jam_232112' => 'required|numeric|min:0',
             'kapasitas_232112' => 'required|integer|min:1',
             'deskripsi_232112' => 'nullable|string',

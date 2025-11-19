@@ -88,7 +88,7 @@
                     <tr>
                         <td>{{ $field->lapangan_id_232112 }}</td>
                         <td>{{ $field->nama_lapangan_232112 }}</td>
-                        <td>{{ $field->jenis_olahraga_232112 }}</td>
+                        <td>{{ $field->jenis_lapangan_232112 }}</td>
                         <td>Rp {{ number_format($field->harga_per_jam_232112, 0, ',', '.') }}</td>
                         <td>{{ $field->kapasitas_232112 }} orang</td>
                         <td>

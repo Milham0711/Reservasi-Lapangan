@@ -74,17 +74,19 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Jenis Olahraga</label>
-                        <select name="jenis_olahraga_232112" class="form-control" required>
-                            <option value="">-- Pilih Jenis Olahraga --</option>
-                            <option value="futsal" {{ old('jenis_olahraga_232112', $field->jenis_olahraga_232112) == 'futsal' ? 'selected' : '' }}>Futsal</option>
-                            <option value="badminton" {{ old('jenis_olahraga_232112', $field->jenis_olahraga_232112) == 'badminton' ? 'selected' : '' }}>Badminton</option>
-                            <option value="basket" {{ old('jenis_olahraga_232112', $field->jenis_olahraga_232112) == 'basket' ? 'selected' : '' }}>Basket</option>
-                            <option value="tennis" {{ old('jenis_olahraga_232112', $field->jenis_olahraga_232112) == 'tennis' ? 'selected' : '' }}>Tenis</option>
-                            <option value="voli" {{ old('jenis_olahraga_232112', $field->jenis_olahraga_232112) == 'voli' ? 'selected' : '' }}>Voli</option>
+                        <label class="form-label">Jenis Lapangan</label>
+                        <select name="jenis_lapangan_232112" class="form-control" required>
+                            <option value="">Pilih Jenis Lapangan</option>
+                            <option value="futsal" {{ old('jenis_lapangan_232112', $field->jenis_lapangan_232112) == 'futsal' ? 'selected' : '' }}>Futsal</option>
+                            <option value="badminton" {{ old('jenis_lapangan_232112', $field->jenis_lapangan_232112) == 'badminton' ? 'selected' : '' }}>Badminton</option>
+                            <option value="sepak bola" {{ old('jenis_lapangan_232112', $field->jenis_lapangan_232112) == 'sepak bola' ? 'selected' : '' }}>Sepak Bola</option>
+                            <option value="basket" {{ old('jenis_lapangan_232112', $field->jenis_lapangan_232112) == 'basket' ? 'selected' : '' }}>Basket</option>
+                            <option value="voli" {{ old('jenis_lapangan_232112', $field->jenis_lapangan_232112) == 'voli' ? 'selected' : '' }}>Voli</option>
+                            <option value="tenis" {{ old('jenis_lapangan_232112', $field->jenis_lapangan_232112) == 'tenis' ? 'selected' : '' }}>Tenis</option>
+                            <option value="bulu tangkis" {{ old('jenis_lapangan_232112', $field->jenis_lapangan_232112) == 'bulu tangkis' ? 'selected' : '' }}>Bulu Tangkis</option>
                         </select>
-                        @if($errors->has('jenis_olahraga_232112'))
-                            <div class="text-danger">{{ $errors->first('jenis_olahraga_232112') }}</div>
+                        @if($errors->has('jenis_lapangan_232112'))
+                            <div class="text-danger">{{ $errors->first('jenis_lapangan_232112') }}</div>
                         @endif
                     </div>
 

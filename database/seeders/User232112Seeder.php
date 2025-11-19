@@ -14,7 +14,7 @@ class User232112Seeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('users_232112')->insert([
+        $users = [
             [
                 'nama_232112' => 'Admin SportVenue',
                 'email_232112' => 'admin@sportvenue.com',
@@ -42,6 +42,13 @@ class User232112Seeder extends Seeder
                 'created_at_232112' => now(),
                 'updated_at_232112' => now(),
             ],
-        ]);
+        ];
+
+        foreach ($users as $user) {
+            DB::table('users_232112')->updateOrInsert(
+                ['email_232112' => $user['email_232112']], // condition to check
+                $user // data to insert or update
+            );
+        }
     }
 }

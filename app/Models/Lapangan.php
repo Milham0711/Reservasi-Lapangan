@@ -17,12 +17,13 @@ class Lapangan extends Model
         'deskripsi_232112',
         'status_232112',
         'gambar_232112',
+        'kapasitas_232112',
         // friendly names for mass assignment
-        'name', 'type', 'price', 'description', 'status', 'image',
+        'name', 'type', 'price', 'description', 'status', 'image', 'capacity'
     ];
 
     // Expose friendly attribute names and include them when serializing
-    protected $appends = ['id', 'name', 'type', 'price', 'description', 'status', 'image', 'created_at_readable'];
+    protected $appends = ['id', 'name', 'type', 'price', 'description', 'status', 'image', 'created_at_readable', 'capacity'];
 
     // Accessors
     public function getIdAttribute()
@@ -90,6 +91,16 @@ class Lapangan extends Model
         $this->attributes['gambar_232112'] = $value;
     }
 
+    public function getCapacityAttribute()
+    {
+        return $this->attributes['kapasitas_232112'] ?? null;
+    }
+
+    public function setCapacityAttribute($value)
+    {
+        $this->attributes['kapasitas_232112'] = $value;
+    }
+    
     public function getCreatedAtReadableAttribute()
     {
         return $this->attributes['created_at_232112'] ?? null;

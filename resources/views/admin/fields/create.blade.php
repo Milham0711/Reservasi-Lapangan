@@ -69,16 +69,16 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="jenis_olahraga_232112">Jenis Olahraga <span class="required">*</span></label>
-                    <select id="jenis_olahraga_232112" name="jenis_olahraga_232112" required>
-                        <option value="">Pilih Jenis Olahraga</option>
-                        <option value="Sepak Bola" {{ old('jenis_olahraga_232112') == 'Sepak Bola' ? 'selected' : '' }}>Sepak Bola</option>
-                        <option value="Basket" {{ old('jenis_olahraga_232112') == 'Basket' ? 'selected' : '' }}>Basket</option>
-                        <option value="Voli" {{ old('jenis_olahraga_232112') == 'Voli' ? 'selected' : '' }}>Voli</option>
-                        <option value="Badminton" {{ old('jenis_olahraga_232112') == 'Badminton' ? 'selected' : '' }}>Badminton</option>
-                        <option value="Tenis" {{ old('jenis_olahraga_232112') == 'Tenis' ? 'selected' : '' }}>Tenis</option>
-                        <option value="Futsal" {{ old('jenis_olahraga_232112') == 'Futsal' ? 'selected' : '' }}>Futsal</option>
-                        <option value="Bulu Tangkis" {{ old('jenis_olahraga_232112') == 'Bulu Tangkis' ? 'selected' : '' }}>Bulu Tangkis</option>
+                    <label for="jenis_lapangan_232112">Jenis lapangan <span class="required">*</span></label>
+                    <select id="jenis_lapangan_232112" name="jenis_lapangan_232112" required>
+                        <option value="">Pilih Jenis lapangan</option>
+                        <option value="sepak bola" {{ old('jenis_lapangan_232112') == 'sepak bola' ? 'selected' : '' }}>Sepak Bola</option>
+                        <option value="basket" {{ old('jenis_lapangan_232112') == 'basket' ? 'selected' : '' }}>Basket</option>
+                        <option value="voli" {{ old('jenis_lapangan_232112') == 'voli' ? 'selected' : '' }}>Voli</option>
+                        <option value="badminton" {{ old('jenis_lapangan_232112') == 'badminton' ? 'selected' : '' }}>Badminton</option>
+                        <option value="tenis" {{ old('jenis_lapangan_232112') == 'tenis' ? 'selected' : '' }}>Tenis</option>
+                        <option value="futsal" {{ old('jenis_lapangan_232112') == 'futsal' ? 'selected' : '' }}>Futsal</option>
+                        <option value="bulu tangkis" {{ old('jenis_lapangan_232112') == 'bulu tangkis' ? 'selected' : '' }}>Bulu Tangkis</option>
                     </select>
                 </div>
 
