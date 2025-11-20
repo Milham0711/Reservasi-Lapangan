@@ -2,47 +2,59 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    protected $table = 'users_232112';
+    protected $primaryKey = 'user_id_232112';
+    
+    const CREATED_AT = 'created_at_232112';
+    const UPDATED_AT = 'updated_at_232112';
+
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'nama_232112',
+        'email_232112',
+        'password_232112',
+        'role_232112',
+        'telepon_232112',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password_232112',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    // Relasi dengan Reservasi
+    public function reservasi()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->hasMany(Reservasi::class, 'user_id_232112', 'user_id_232112');
+    }
+
+    // Relasi dengan Notifikasi
+    public function notifikasi()
+    {
+        return $this->hasMany(Notifikasi::class, 'user_id_232112', 'user_id_232112');
+    }
+
+    // Check if user is admin
+    public function isAdmin()
+    {
+        return $this->role_232112 === 'admin';
+    }
+
+    // Override getAuthPassword untuk custom password field
+    public function getAuthPassword()
+    {
+        return $this->password_232112;
+    }
+
+    // Override getAuthIdentifierName untuk custom primary key
+    public function getAuthIdentifierName()
+    {
+        return 'user_id_232112';
     }
 }

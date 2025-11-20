@@ -3,100 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - SportVenue Reservation</title>
-    <link href="{{ asset('css/auth.css') }}" rel="stylesheet">
+    <title>Login - SportVenue</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="login-container">
-        <div class="login-header">
-            <h1>SportVenue Reservation</h1>
-            <p>Sistem Reservasi Lapangan Olahraga</p>
-        </div>
-        
-        <div class="login-type">
-            <button type="button" class="login-type-btn active" id="userBtn">Member</button>
-            <button type="button" class="login-type-btn" id="adminBtn">Admin</button>
-        </div>
-        
-        <form class="login-form" method="POST" action="{{ route('login') }}">
-            @csrf
-            <input type="hidden" id="user_type" name="user_type" value="user">
-
-            @if(session('error'))
-                <div class="alert alert-error">
-                    {{ session('error') }}
+<body class="bg-gradient-to-br from-blue-500 to-purple-600 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full">
+        <!-- Card -->
+        <div class="bg-white rounded-2xl shadow-2xl p-8">
+            <!-- Logo/Header -->
+            <div class="text-center mb-8">
+                <div class="inline-block p-3 bg-blue-100 rounded-full mb-4">
+                    <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                    </svg>
                 </div>
+                <h2 class="text-3xl font-bold text-gray-800">SportVenue</h2>
+                <p class="text-gray-600 mt-2">Masuk ke akun Anda</p>
+            </div>
+
+            <!-- Error Messages -->
+            @if ($errors->any())
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded">
+                <div class="flex">
+                    <svg class="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"/>
+                    </svg>
+                    <p class="text-red-700 text-sm">{{ $errors->first() }}</p>
+                </div>
+            </div>
             @endif
 
-            @if(session('success'))
-                <div class="alert alert-success">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" class="form-control" placeholder="Masukkan email Anda" required value="{{ old('email') }}">
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="Masukkan password Anda" required>
-            </div>
-
-            <div class="form-options">
-                <div class="remember-me">
-                    <input type="checkbox" id="remember" name="remember">
-                    <label for="remember">Ingatkan saya</label>
-                </div>
-                <a href="#" class="forgot-password" onclick="showComingSoon()">Lupa password?</a>
-            </div>
-
-            <button type="submit" class="login-btn" id="loginBtn">Masuk sebagai Member</button>
-
-            <div class="register-link">
-                Belum menjadi member? <a href="{{ route('register') }}">Daftar Sekarang</a>
-            </div>
-
-            <div class="test-credentials" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
-                <h4 style="margin: 0 0 10px 0; color: #495057; font-size: 14px;">Test Credentials:</h4>
-                <div style="font-size: 12px; color: #6c757d;">
-                    <strong>Admin:</strong> admin@sportvenue.com / admin123<br>
-                    <strong>User:</strong> user@sportvenue.com / user123<br>
-                    <strong>John Doe:</strong> john@example.com / password
-                </div>
-            </div>
-        </form>
-    </div>
-
-    <script>
-        function showComingSoon() {
-            alert('Fitur lupa password sedang dalam pengembangan.');
-            return false;
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const userBtn = document.getElementById('userBtn');
-            const adminBtn = document.getElementById('adminBtn');
-            const loginBtn = document.getElementById('loginBtn');
-            const userTypeInput = document.getElementById('user_type');
-            
-            if (userBtn && adminBtn) {
-                userBtn.addEventListener('click', function() {
-                    userBtn.classList.add('active');
-                    adminBtn.classList.remove('active');
-                    loginBtn.textContent = 'Masuk sebagai Member';
-                    userTypeInput.value = 'user';
-                });
+            <!-- Login Form -->
+            <form method="POST" action="{{ route('login') }}">
+                @csrf
                 
-                adminBtn.addEventListener('click', function() {
-                    adminBtn.classList.add('active');
-                    userBtn.classList.remove('active');
-                    loginBtn.textContent = 'Masuk sebagai Admin';
-                    userTypeInput.value = 'admin';
-                });
-            }
-        });
-    </script>
+                <!-- Email -->
+                <div class="mb-6">
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" name="email" id="email" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                        placeholder="nama@email.com" value="{{ old('email') }}">
+                </div>
+
+                <!-- Password -->
+                <div class="mb-6">
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input type="password" name="password" id="password" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                        placeholder="••••••••">
+                </div>
+
+                <!-- Remember Me -->
+                <div class="flex items-center justify-between mb-6">
+                    <label class="flex items-center">
+                        <input type="checkbox" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        <span class="ml-2 text-sm text-gray-600">Ingat saya</span>
+                    </label>
+                    <a href="#" class="text-sm text-blue-600 hover:text-blue-700">Lupa password?</a>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 shadow-lg hover:shadow-xl">
+                    Masuk
+                </button>
+            </form>
+
+            <!-- Register Link -->
+            <div class="mt-6 text-center">
+                <p class="text-gray-600">
+                    Belum punya akun? 
+                    <a href="{{ route('register') }}" class="text-blue-600 hover:text-blue-700 font-semibold">Daftar sekarang</a>
+                </p>
+            </div>
+
+            <!-- Demo Accounts -->
+            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                <p class="text-xs text-gray-600 font-semibold mb-2">Demo Akun:</p>
+                <p class="text-xs text-gray-500">Admin: admin@sportvenue.com / password</p>
+                <p class="text-xs text-gray-500">User: john@example.com / password</p>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

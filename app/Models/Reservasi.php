@@ -2,13 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Reservasi extends Model
 {
+    use HasFactory;
+
     protected $table = 'reservasi_232112';
     protected $primaryKey = 'reservasi_id_232112';
-    public $timestamps = false;
+    
+    const CREATED_AT = 'created_at_232112';
+    const UPDATED_AT = 'updated_at_232112';
 
     protected $fillable = [
         'user_id_232112',
@@ -19,130 +24,35 @@ class Reservasi extends Model
         'total_harga_232112',
         'status_reservasi_232112',
         'catatan_232112',
-        'created_at_232112',
-        'updated_at_232112'
     ];
 
-    // Example relationship to Lapangan
+    // Relasi dengan User
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id_232112', 'user_id_232112');
+    }
+
+    // Relasi dengan Lapangan
     public function lapangan()
     {
         return $this->belongsTo(Lapangan::class, 'lapangan_id_232112', 'lapangan_id_232112');
     }
 
+    // Relasi dengan Pembayaran
     public function pembayaran()
     {
-        return $this->hasMany(Pembayaran::class, 'reservasi_id_232112', 'reservasi_id_232112');
+        return $this->hasOne(Pembayaran::class, 'reservasi_id_232112', 'reservasi_id_232112');
     }
 
-    // Friendly attributes
-    protected $appends = ['id', 'code', 'user_id', 'lapangan_id', 'date', 'start_time', 'end_time', 'duration_hours', 'total', 'status', 'created_at_readable'];
-
-    public function getIdAttribute()
+    // Scope untuk filter berdasarkan status
+    public function scopeStatus($query, $status)
     {
-        return $this->attributes[$this->primaryKey] ?? null;
+        return $query->where('status_reservasi_232112', $status);
     }
 
-    public function getCodeAttribute()
+    // Scope untuk reservasi hari ini
+    public function scopeToday($query)
     {
-        return $this->attributes['kode_booking_232112'] ?? null;
+        return $query->whereDate('tanggal_reservasi_232112', today());
     }
-
-    public function setCodeAttribute($value)
-    {
-        $this->attributes['kode_booking_232112'] = $value;
-    }
-
-    public function getUserIdAttribute()
-    {
-        return $this->attributes['user_id_232112'] ?? null;
-    }
-
-    public function getLapanganIdAttribute()
-    {
-        return $this->attributes['lapangan_id_232112'] ?? null;
-    }
-
-    public function getDateAttribute()
-    {
-        return $this->attributes['tanggal_reservasi_232112'] ?? null;
-    }
-
-    public function getStartTimeAttribute()
-    {
-        return $this->attributes['waktu_mulai_232112'] ?? null;
-    }
-
-    public function getEndTimeAttribute()
-    {
-        return $this->attributes['waktu_selesai_232112'] ?? null;
-    }
-
-    public function getDurationHoursAttribute()
-    {
-        // Calculate duration from start and end time
-        if (isset($this->attributes['waktu_mulai_232112']) && isset($this->attributes['waktu_selesai_232112'])) {
-            $start = strtotime($this->attributes['waktu_mulai_232112']);
-            $end = strtotime($this->attributes['waktu_selesai_232112']);
-            return ($end - $start) / 3600;
-        }
-        return null;
-    }
-
-    public function getTotalAttribute()
-    {
-        return isset($this->attributes['total_harga_232112']) ? (float) $this->attributes['total_harga_232112'] : null;
-    }
-
-    public function getStatusAttribute()
-    {
-        return $this->attributes['status_reservasi_232112'] ?? null;
-    }
-
-    public function getCreatedAtReadableAttribute()
-    {
-        return $this->attributes['created_at_232112'] ?? null;
-    }
-
-    // Setters for friendly attributes (mass assignment support)
-    public function setUserIdAttribute($value)
-    {
-        $this->attributes['user_id_232112'] = $value;
-    }
-
-    public function setLapanganIdAttribute($value)
-    {
-        $this->attributes['lapangan_id_232112'] = $value;
-    }
-
-    public function setDateAttribute($value)
-    {
-        $this->attributes['tanggal_reservasi_232112'] = $value;
-    }
-
-    public function setStartTimeAttribute($value)
-    {
-        $this->attributes['waktu_mulai_232112'] = $value;
-    }
-
-    public function setEndTimeAttribute($value)
-    {
-        $this->attributes['waktu_selesai_232112'] = $value;
-    }
-
-    public function setDurationHoursAttribute($value)
-    {
-        // Duration is calculated from start and end time, not stored separately
-    }
-
-    public function setTotalAttribute($value)
-    {
-        $this->attributes['total_harga_232112'] = $value;
-    }
-
-    public function setStatusAttribute($value)
-    {
-        $this->attributes['status_reservasi_232112'] = $value;
-    }
-
 }
-
