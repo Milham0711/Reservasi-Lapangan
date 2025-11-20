@@ -4,129 +4,166 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - SportVenue</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #f8f9fa; }
-        .navbar { background: linear-gradient(to right, #dc2626, #ef4444); color: white; padding: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
-        .card { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 1rem; }
-        .btn { background: #dc2626; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; margin: 5px; }
-        .btn-secondary { background: #6c757d; }
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background: white; padding: 1.5rem; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .stat-number { font-size: 2rem; font-weight: bold; color: #dc2626; }
-        .admin-features { margin-top: 1rem; padding: 1rem; background: #fef2f2; border-radius: 5px; }
-        .quick-actions { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0; }
-        .alert { padding: 12px; border-radius: 5px; margin-bottom: 1rem; }
-        .alert-info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee3f8; }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-
-    <nav class="navbar">
-    <div class="container">
-        <h1>SportVenue - Admin Dashboard</h1>
-        <div style="display: flex; align-items: center; gap: 1.5rem; position: relative; z-index: 10000;">
-            @include('components.notification-bell')
-            <div>
-                    <p style="margin: 0;">Welcome, {{ $user['name'] }}! | {{ $user['email'] }}</p>
+<body class="bg-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold text-blue-600">SportVenue</span>
+                    <span class="ml-3 px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">Admin</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-700">{{ Auth::user()->nama_232112 }}</span>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition">
+                            Logout
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
     </nav>
-    
-    <div class="container">
-        @if(session('info'))
-            <div class="alert alert-info">
-                {{ session('info') }}
-            </div>
-        @endif
 
-        @if(isset($user['is_temporary']) && $user['is_temporary'])
-        <div class="alert alert-info">
-            <strong>Info:</strong> Ini adalah akun temporary. Data registrasi Anda tidak disimpan secara permanen.
-        </div>
-        @endif
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white min-h-screen shadow-lg">
+            <nav class="p-4">
+                <a href="{{ route('admin.dashboard') }}" class="flex items-center space-x-3 px-4 py-3 bg-blue-50 text-blue-600 rounded-lg mb-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    <span class="font-semibold">Dashboard</span>
+                </a>
+                <a href="{{ route('admin.lapangan.index') }}" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg mb-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                    </svg>
+                    <span>Kelola Lapangan</span>
+                </a>
+                <a href="{{ route('admin.reservasi.index') }}" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg mb-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    <span>Kelola Reservasi</span>
+                </a>
+                <a href="{{ route('admin.report.index') }}" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg mb-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    <span>Laporan</span>
+                </a>
+            </nav>
+        </aside>
 
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-number">{{ $totalReservations }}</div>
-                <div>Total Reservasi</div>
+        <!-- Main Content -->
+        <main class="flex-1 p-8">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-800">Dashboard Admin</h1>
+                <p class="text-gray-600 mt-1">Selamat datang kembali, {{ Auth::user()->nama_232112 }}!</p>
             </div>
-            <div class="stat-card">
-                <div class="stat-number">{{ $activeFields }}</div>
-                <div>Lapangan Tersedia</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">Rp {{ number_format($monthlyRevenue, 0, ',', '.') }}</div>
-                <div>Pendapatan Bulan Ini</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">{{ $activeUsers }}</div>
-                <div>Member Aktif</div>
-            </div>
-        </div>
 
-        <div class="card">
-            <h2>Admin Quick Actions</h2>
-            <div class="quick-actions">
-                <a href="{{ route('admin.reservations') }}" class="btn">📋 Kelola Reservasi</a>
-                <a href="{{ route('admin.fields') }}" class="btn">🏟️ Kelola Lapangan</a>
-                <a href="{{ route('admin.users') }}" class="btn">👥 Kelola Member</a>
-                <a href="{{ route('admin.payments') }}" class="btn">💰 Kelola Pembayaran</a>
-                <a href="{{ route('admin.reports') }}" class="btn">📊 Laporan Keuangan</a>
-                <a href="#" class="btn" onclick="showComingSoon()">⚙️ Pengaturan Sistem</a>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>Reservasi Hari Ini</h2>
-            <div class="admin-features">
-                @if($todayReservations->count() > 0)
-                    <p><strong>{{ $todayReservations->count() }} Reservasi</strong> untuk hari ini</p>
-                    <div style="margin-top: 1rem;">
-                        @foreach($todayReservations as $reservation)
-                            <div style="border-bottom: 1px solid #eee; padding: 0.5rem 0;">
-                                <strong>{{ $reservation->kode_booking_232112 }}</strong> -
-                                {{ $reservation->lapangan->nama_lapangan_232112 ?? 'N/A' }}<br>
-                                <small>{{ $reservation->waktu_mulai_232112 }} - {{ $reservation->waktu_selesai_232112 }} | Status: {{ $reservation->status_reservasi_232112 }}</small>
-                            </div>
-                        @endforeach
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 font-semibold">Total Lapangan</p>
+                            <p class="text-3xl font-bold text-gray-800 mt-2">{{ $totalLapangan }}</p>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                        </div>
                     </div>
-                @else
-                    <p><strong>0 Reservasi</strong> untuk hari ini</p>
-                    <p style="color: #666; margin-top: 0.5rem;">Belum ada reservasi yang masuk.</p>
-                @endif
-            </div>
-        </div>
+                </div>
 
-        <div class="card">
-            <h2>Informasi Admin</h2>
-            <p style="color: #666;">Panel admin sedang dalam tahap pengembangan. Fitur-fitur manajemen akan segera tersedia.</p>
-            <div class="admin-features">
-                <h3>Fitur yang Akan Datang:</h3>
-                <ul>
-                    <li>Manajemen Reservasi</li>
-                    <li>Manajemen Lapangan</li>
-                    <li>Manajemen User/Member</li>
-                    <li>Laporan dan Analytics</li>
-                </ul>
-            </div>
-        </div>
+                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 font-semibold">Total Reservasi</p>
+                            <p class="text-3xl font-bold text-gray-800 mt-2">{{ $totalReservasi }}</p>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="card">
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="btn">🚪 Logout</button>
-            </form>
-        </div>
+                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-yellow-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 font-semibold">Menunggu Konfirmasi</p>
+                            <p class="text-3xl font-bold text-gray-800 mt-2">{{ $pendingReservasi }}</p>
+                        </div>
+                        <div class="bg-yellow-100 p-3 rounded-full">
+                            <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 font-semibold">Total User</p>
+                            <p class="text-3xl font-bold text-gray-800 mt-2">{{ $totalUser }}</p>
+                        </div>
+                        <div class="bg-purple-100 p-3 rounded-full">
+                            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Reservations -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Reservasi Terbaru</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Lapangan</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Waktu</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            @foreach($recentReservasi as $reservasi)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 text-sm text-gray-900">{{ $reservasi->user->nama_232112 }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-900">{{ $reservasi->lapangan->nama_lapangan_232112 }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-900">{{ date('d M Y', strtotime($reservasi->tanggal_reservasi_232112)) }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-900">{{ date('H:i', strtotime($reservasi->waktu_mulai_232112)) }} - {{ date('H:i', strtotime($reservasi->waktu_selesai_232112)) }}</td>
+                                <td class="px-6 py-4">
+                                    @if($reservasi->status_reservasi_232112 == 'pending')
+                                        <span class="px-3 py-1 text-xs font-semibold text-yellow-800 bg-yellow-100 rounded-full">Pending</span>
+                                    @elseif($reservasi->status_reservasi_232112 == 'confirmed')
+                                        <span class="px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Confirmed</span>
+                                    @elseif($reservasi->status_reservasi_232112 == 'cancelled')
+                                        <span class="px-3 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Cancelled</span>
+                                    @else
+                                        <span class="px-3 py-1 text-xs font-semibold text-blue-800 bg-blue-100 rounded-full">Completed</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
     </div>
-
-    <script>
-        function showComingSoon() {
-            alert('Fitur admin sedang dalam pengembangan.');
-            return false;
-        }
-    </script>
 </body>
 </html>

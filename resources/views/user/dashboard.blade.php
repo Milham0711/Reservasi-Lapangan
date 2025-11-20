@@ -3,201 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Member - SportVenue</title>
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <title>Dashboard - SportVenue</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="container">
-
-        <nav class="navbar">
-            <div class="navbar-brand">
-                <h1 style="font-size:1.25rem; margin:0;">SportVenue</h1>
-            </div>
-            <div class="user-info" style="display:flex; align-items:center; gap:12px;">
-                {{-- mobile hamburger (placeholder) --}}
-                <button id="navToggle" style="display:none; background:transparent; border:none; font-size:1.25rem; cursor:pointer;">☰</button>
-
-                @if(isset($user) && is_array($user))
-                    <div style="position:relative;">
-                        <button id="userMenuBtn" style="background:transparent; border:none; cursor:pointer; font-weight:700;">{{ $user['name'] }} ▾</button>
-                        <div id="userMenu" class="dropdown-menu" style="display:none; position:absolute; right:0; top:36px; background:white; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,0.12); overflow:hidden;">
-                            <a href="#" style="display:block;padding:8px 12px;color:#2d3748;text-decoration:none;">Profile</a>
-                            <form action="{{ route('logout') }}" method="POST" style="margin:0;">
-                                @csrf
-                                <button type="submit" style="display:block;width:100%;text-align:left;padding:8px 12px;border:none;background:transparent;cursor:pointer;">Logout</button>
-                            </form>
-                        </div>
+<body class="bg-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <span class="text-2xl font-bold text-blue-600">SportVenue</span>
+                    <div class="hidden md:flex space-x-4">
+                        <a href="{{ route('user.dashboard') }}" class="text-blue-600 font-semibold px-3 py-2">Dashboard</a>
+                        <a href="{{ route('user.lapangan.index') }}" class="text-gray-600 hover:text-blue-600 px-3 py-2">Lapangan</a>
+                        <a href="{{ route('user.reservasi.index') }}" class="text-gray-600 hover:text-blue-600 px-3 py-2">Reservasi Saya</a>
                     </div>
-                @endif
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-700">{{ Auth::user()->nama_232112 }}</span>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition">
+                            Logout
+                        </button>
+                    </form>
+                </div>
             </div>
-        </nav>
+        </div>
+    </nav>
 
-        <header class="dashboard-header">
-            <h1>Selamat datang di SportVenue</h1>
-            <p>Temukan dan pesan lapangan olahraga terdekat dengan mudah.</p>
-        </header>
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Welcome Section -->
+        <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl shadow-xl p-8 mb-8 text-white">
+            <h1 class="text-3xl font-bold mb-2">Selamat Datang, {{ Auth::user()->nama_232112 }}! 👋</h1>
+            <p class="text-blue-100">Siap untuk bermain hari ini? Pilih lapangan favoritmu dan booking sekarang!</p>
+        </div>
 
-        {{-- Hero slider: shows all locations on top --}}
-        @if(isset($locations) && count($locations) > 0)
-        <div class="card hero-bleed" style="margin-bottom:1.5rem; padding:0;">
-            <div class="slider" role="region" aria-label="Slider kategori lapangan" tabindex="0">
-                <button class="slider-btn prev" aria-label="Sebelumnya">‹</button>
-                <div class="slides" role="list" id="heroSlides">
-                    @php $groups = $locations->groupBy('type'); @endphp
-                    @foreach($groups as $type => $items)
-                    <div class="slide" role="listitem" aria-hidden="true">
-                            @php
-                                $bannerImages = [
-                                    'futsal' => asset('images/banners/futsal-banner.jpg'),
-                                    'badminton' => asset('images/banners/badminton-banner.jpg'),
-                                    'basket' => asset('images/banners/sports-banner.jpg'),
-                                    'tennis' => asset('images/banners/sports-banner.jpg'),
-                                    'voli' => asset('images/banners/sports-banner.jpg')
-                                ];
-                                $banner = $bannerImages[$type] ?? asset('images/banners/sports-banner.jpg');
-                            @endphp
-                            <a href="{{ route('locations.index', ['type' => $type]) }}" class="slide-link" style="display:block; text-decoration:none; color:inherit;">
-                                <div class="slide-banner" style="background-image:url('{{ $banner }}')" aria-hidden="true"></div>
-                            </a>
-                            <div style="padding:1rem; color:#2d3748;">
-                                <h3 style="margin-bottom:0.5rem;">{{ ucfirst($type) }}</h3>
-                                <div style="color:#718096; font-size:0.95rem; margin-bottom:0.75rem;">{{ $items->count() }} lokasi</div>
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 font-semibold">Total Reservasi</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-2">{{ $totalReservasi }}</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-yellow-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 font-semibold">Menunggu Konfirmasi</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-2">{{ $pendingReservasi }}</p>
+                    </div>
+                    <div class="bg-yellow-100 p-3 rounded-full">
+                        <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 font-semibold">Terkonfirmasi</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-2">{{ $confirmedReservasi }}</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <a href="{{ route('user.lapangan.index', ['jenis' => 'futsal']) }}" class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition group">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-blue-100 p-4 rounded-full group-hover:bg-blue-200 transition">
+                        <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800">Booking Futsal</h3>
+                        <p class="text-gray-600 text-sm">Lihat & booking lapangan futsal</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ route('user.lapangan.index', ['jenis' => 'badminton']) }}" class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition group">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-green-100 p-4 rounded-full group-hover:bg-green-200 transition">
+                        <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800">Booking Badminton</h3>
+                        <p class="text-gray-600 text-sm">Lihat & booking lapangan badminton</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Recent Reservations -->
+        <div class="bg-white rounded-xl shadow-md p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Reservasi Terbaru</h2>
+                <a href="{{ route('user.reservasi.index') }}" class="text-blue-600 hover:text-blue-700 font-semibold text-sm">
+                    Lihat Semua →
+                </a>
+            </div>
+
+            @if($recentReservasi->count() > 0)
+            <div class="space-y-4">
+                @foreach($recentReservasi as $reservasi)
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-800">{{ $reservasi->lapangan->nama_lapangan_232112 }}</h3>
+                            <div class="flex items-center space-x-4 mt-2 text-sm text-gray-600">
+                                <span class="flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    {{ date('d M Y', strtotime($reservasi->tanggal_reservasi_232112)) }}
+                                </span>
+                                <span class="flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    {{ date('H:i', strtotime($reservasi->waktu_mulai_232112)) }} - {{ date('H:i', strtotime($reservasi->waktu_selesai_232112)) }}
+                                </span>
+                                <span class="font-semibold text-blue-600">Rp {{ number_format($reservasi->total_harga_232112, 0, ',', '.') }}</span>
                             </div>
-                        <div class="category-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; padding:0 1rem 1rem 1rem;">
-                            @foreach($items as $loc)
-                            <a href="{{ route('locations.show', ['id' => $loc->id]) }}" class="cat-card" style="background:#fff;border-radius:10px;overflow:hidden;text-decoration:none;color:inherit; display:block;">
-                                <div class="cat-title">{{ $loc->name }}</div>
-                                <div class="cat-sub">Rp {{ number_format($loc->price ?? 0, 0, ',', '.') }}/jam</div>
-                            </a>
-                            @endforeach
                         </div>
-                    </div>
-                    @endforeach
-                    {{-- Additional static slide for demonstration --}}
-                    <div class="slide" role="listitem" aria-hidden="true">
-                        <a href="{{ route('reservations.create') }}" class="slide-link" style="display:block; text-decoration:none; color:inherit;">
-                            <div class="slide-banner" style="background-image:url('{{ asset('images/banners/sports-banner.jpg') }}')" aria-hidden="true"></div>
-                        </a>
-                        <div style="padding:1rem; color:#2d3748;">
-                            <h3 style="margin-bottom:0.5rem;">Promo Spesial</h3>
-                            <div style="color:#718096; font-size:0.95rem; margin-bottom:0.75rem;">Diskon 20% untuk member baru</div>
-                        </div>
-                        <div class="category-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; padding:0 1rem 1rem 1rem;">
-                            <a href="#" class="cat-card" style="background:#fff;border-radius:10px;overflow:hidden;text-decoration:none;color:inherit; display:block;">
-                                <div class="cat-title">Lapangan Futsal</div>
-                                <div class="cat-sub">Rp 75.000/jam</div>
-                            </a>
-                            <a href="#" class="cat-card" style="background:#fff;border-radius:10px;overflow:hidden;text-decoration:none;color:inherit; display:block;">
-                                <div class="cat-title">Lapangan Badminton</div>
-                                <div class="cat-sub">Rp 80.000/jam</div>
-                            </a>
+                        <div>
+                            @if($reservasi->status_reservasi_232112 == 'pending')
+                                <span class="px-4 py-2 text-xs font-semibold text-yellow-800 bg-yellow-100 rounded-full">Pending</span>
+                            @elseif($reservasi->status_reservasi_232112 == 'confirmed')
+                                <span class="px-4 py-2 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Confirmed</span>
+                            @elseif($reservasi->status_reservasi_232112 == 'cancelled')
+                                <span class="px-4 py-2 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Cancelled</span>
+                            @else
+                                <span class="px-4 py-2 text-xs font-semibold text-blue-800 bg-blue-100 rounded-full">Completed</span>
+                            @endif
                         </div>
                     </div>
                 </div>
-                <button class="slider-btn next" aria-label="Selanjutnya (kategori)" title="Selanjutnya (kategori)" aria-controls="heroSlides">›</button>
+                @endforeach
             </div>
-            <div class="slider-dots" role="tablist" aria-label="Pilih kategori"></div>
-            <div id="sliderAnnouncement" class="sr-only" aria-live="polite"></div>
+            @else
+            <div class="text-center py-12">
+                <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                <p class="text-gray-500 mb-4">Belum ada reservasi</p>
+                <a href="{{ route('user.lapangan.index') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition">
+                    Booking Sekarang
+                </a>
+            </div>
+            @endif
         </div>
-        @endif
-
-        
-
-        <div class="sports-grid">
-            <div class="card">
-                <div class="sport-header">
-                    <div class="sport-icon futsal-icon">⚽</div>
-                    <div>
-                        <div class="sport-title">Lapangan Futsal</div>
-                        <div class="sport-subtitle">Lapangan indoor berkualitas</div>
-                    </div>
-                </div>
-                <div class="field-list">
-                    <div class="field-item">
-                        <div class="field-info">
-                            <div class="field-name">Lapangan Vinyl Futsal</div>
-                            <div class="field-details">Ukuran: 25x15m • Rp 50.000/jam</div>
-                        </div>
-                        <div class="field-status status-available">Tersedia</div>
-                    </div>
-                    <div class="field-item">
-                        <div class="field-info">
-                            <div class="field-name">Lapangan Sintetis Futsal</div>
-                            <div class="field-details">Ukuran: 25x15m • Rp 40.000/jam</div>
-                        </div>
-                        <div class="field-status status-available">Tersedia</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="sport-header">
-                    <div class="sport-icon badminton-icon">🏸</div>
-                    <div>
-                        <div class="sport-title">Lapangan Badminton</div>
-                        <div class="sport-subtitle">Lapangan standar nasional</div>
-                    </div>
-                </div>
-                <div class="field-list">
-                    <div class="field-item">
-                        <div class="field-info">
-                            <div class="field-name">Badminton 1</div>
-                            <div class="field-details">Indoor • Rp 80.000/jam</div>
-                        </div>
-                        <div class="field-status status-available">Tersedia</div>
-                    </div>
-                    <div class="field-item">
-                        <div class="field-info">
-                            <div class="field-name">Badminton 2</div>
-                            <div class="field-details">Indoor • Rp 80.000/jam</div>
-                        </div>
-                        <div class="field-status status-available">Tersedia</div>
-                    </div>
-                    <div class="field-item">
-                        <div class="field-info">
-                            <div class="field-name">Badminton 3</div>
-                            <div class="field-details">Indoor • Rp 80.000/jam</div>
-                        </div>
-                        <div class="field-status status-booked">Booked</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Per-sport sliders removed; only the main hero slider remains above --}}
-
-        <div class="card">
-            <h2 class="section-title">JADWAL RESERVASI</h2>
-            
-            <div class="reservation-grid">
-                <div class="reservation-card">
-                    <div class="reservation-sport">Futsal Vinyl</div>
-                    <div class="reservation-details">
-                        📅 25 Okt 2024<br>⏰ 19:00 - 21:00<br>💰 Rp 100.000
-                    </div>
-                    <span class="reservation-status">Confirmed</span>
-                </div>
-                
-                <div class="reservation-card">
-                    <div class="reservation-sport">Badminton 2</div>
-                    <div class="reservation-details">
-                        📅 26 Okt 2024<br>⏰ 16:00 - 17:00<br>💰 Rp 80.000
-                    </div>
-                    <span class="reservation-status">Pending</span>
-                </div>
-            </div>
-
-            <div style="text-align: center; padding: 2rem; color: #718096;">
-                <p>Belum ada reservasi? Yuk booking lapangan favorit Anda!</p>
-            </div>
-            
-            <div class="action-buttons">
-                <a href="{{ route('reservations.create') }}" class="btn btn-primary">📅 Buat Reservasi Baru</a>
-                <a href="{{ route('reservations.index') }}" class="btn btn-secondary">📋 Lihat Semua Reservasi</a>
-            </div>
-        </div>
-    </div>
-    
-    <script src="{{ asset('js/dashboard.js') }}"></script>
+    </main>
 </body>
 </html>

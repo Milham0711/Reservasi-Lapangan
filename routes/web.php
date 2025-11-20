@@ -1,61 +1,72 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\ReservationController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\LocationController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\User\UserController;
 
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// Public Routes
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+// Auth Routes
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
-Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/dashboard', [AuthController::class, 'userDashboard'])->name('user.dashboard');
-Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-Route::get('/admin/reservations', [AdminController::class, 'reservations'])->name('admin.reservations');
-Route::get('/admin/fields', [AdminController::class, 'fields'])->name('admin.fields');
-Route::get('/admin/fields/create', [AdminController::class, 'createField'])->name('admin.fields.create');
-Route::post('/admin/fields', [AdminController::class, 'storeField'])->name('admin.fields.store');
-Route::get('/admin/fields/{id}/edit', [AdminController::class, 'editField'])->name('admin.fields.edit');
-Route::put('/admin/fields/{id}', [AdminController::class, 'updateField'])->name('admin.fields.update');
-Route::delete('/admin/fields/{id}', [AdminController::class, 'deleteField'])->name('admin.fields.delete');
-Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
-Route::get('/admin/payments', [AdminController::class, 'payments'])->name('admin.payments');
-Route::get('/admin/reports', [AdminController::class, 'reports'])->name('admin.reports');
+// Admin Routes
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    
+    // Lapangan Management
+    Route::get('/lapangan', [AdminController::class, 'lapanganIndex'])->name('lapangan.index');
+    Route::get('/lapangan/create', [AdminController::class, 'lapanganCreate'])->name('lapangan.create');
+    Route::post('/lapangan', [AdminController::class, 'lapanganStore'])->name('lapangan.store');
+    Route::get('/lapangan/{id}/edit', [AdminController::class, 'lapanganEdit'])->name('lapangan.edit');
+    Route::put('/lapangan/{id}', [AdminController::class, 'lapanganUpdate'])->name('lapangan.update');
+    Route::delete('/lapangan/{id}', [AdminController::class, 'lapanganDelete'])->name('lapangan.destroy');
+    
+    // Reservasi Management
+    Route::get('/reservasi', [AdminController::class, 'reservasiIndex'])->name('reservasi.index');
+    Route::put('/reservasi/{id}', [AdminController::class, 'reservasiUpdate'])->name('reservasi.update');
 
-Route::post('/admin/reservations/{id}/status', [AdminController::class, 'updateReservationStatus'])->name('admin.reservations.update-status');
-Route::post('/admin/payments/{id}/status', [AdminController::class, 'updatePaymentStatus'])->name('admin.payments.update-status');
-Route::post('/admin/fields/{id}/status', [AdminController::class, 'updateFieldStatus'])->name('admin.fields.update-status');
+    // Reporting Management
+    Route::get('/report', [AdminController::class, 'report'])->name('report.index');
+    Route::get('/report/data', [AdminController::class, 'reportData'])->name('report.data');
+    Route::post('/report/export/excel', [AdminController::class, 'exportExcel'])->name('report.export.excel');
+    Route::post('/report/export/pdf', [AdminController::class, 'exportPdf'])->name('report.export.pdf');
+});
 
-Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
-Route::get('/reservations/create', [ReservationController::class, 'create'])->name('reservations.create');
+// User Routes
+Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
+    Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
+    
+    // Lapangan
+    Route::get('/lapangan', [UserController::class, 'lapanganIndex'])->name('lapangan.index');
+    Route::get('/lapangan/{id}', [UserController::class, 'lapanganShow'])->name('lapangan.show');
+    
+    // Reservasi
+    Route::get('/reservasi', [UserController::class, 'reservasiIndex'])->name('reservasi.index');
+    Route::get('/reservasi/create/{lapanganId}', [UserController::class, 'reservasiCreate'])->name('reservasi.create');
+    Route::post('/reservasi', [UserController::class, 'reservasiStore'])->name('reservasi.store');
+    Route::post('/midtrans/webhook', [UserController::class, 'handleMidtransWebhook'])->name('midtrans.webhook');
+    Route::post('/reservasi/{id}/confirm-payment', [UserController::class, 'confirmPayment'])->name('user.reservasi.confirm-payment');
+    Route::get('/reservasi/{id}/pay', [UserController::class, 'showPaymentPage'])->name('reservasi.pay');
+});
 
-Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
-Route::get('/reservations/{id}/edit', [ReservationController::class, 'edit'])->name('reservations.edit');
-Route::put('/reservations/{id}', [ReservationController::class, 'update'])->name('reservations.update');
-Route::delete('/reservations/{id}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
-
-Route::get('/reservations/{id}/payment', [ReservationController::class, 'payment'])->name('reservations.payment');
-Route::post('/reservations/{id}/payment', [ReservationController::class, 'processPayment'])->name('reservations.process-payment');
-
-Route::post('/notifications/clear', [NotificationController::class, 'clearNotifications'])->name('notifications.clear');
-
-// Locations index (list/filter by type)
-Route::get('/locations', [LocationController::class, 'index'])->name('locations.index');
-
-// Location detail (used by dashboard slider)
-Route::get('/locations/{id}', [LocationController::class, 'show'])->name('locations.show');
-
-// API route to get fields by sport type
-Route::get('/api/fields/{sportType}', [ReservationController::class, 'getFieldsBySportType'])->name('api.fields.by-type');
-
-// Debug routes removed. They were only intended for local troubleshooting and
-// have been cleaned up. If you still need diagnostics, re-add them or run
-// the temporary routes locally while developing.
+// Redirect to appropriate dashboard
+Route::get('/dashboard', function () {
+    if (auth()->user()->isAdmin()) {
+        return redirect()->route('admin.dashboard');
+    }
+    return redirect()->route('user.dashboard');
+})->middleware('auth')->name('dashboard');
