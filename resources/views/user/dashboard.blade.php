@@ -40,6 +40,54 @@
             <p class="text-blue-100">Siap untuk bermain hari ini? Pilih lapangan favoritmu dan booking sekarang!</p>
         </div>
 
+        <!-- Image Slider -->
+        <div class="mb-8">
+    <div class="relative overflow-hidden rounded-2xl shadow-lg">
+        <!-- Slider Container -->
+        <div class="relative h-80 md:h-[450px] lg:h-[520px] overflow-hidden">
+            <div class="absolute inset-0 flex transition-transform duration-500 ease-in-out" id="slider-container">
+                <div class="w-full h-full flex-shrink-0">
+                    <img src="https://gelora-public-storage.s3-ap-southeast-1.amazonaws.com/upload/public-20240624104756.jpg" 
+                         alt="Sport Facility 1" class="w-full h-full object-cover">
+                </div>
+                <div class="w-full h-full flex-shrink-0">
+                    <img src="https://mediaini.com/wp-content/uploads/2022/02/daftar-lapangan-tenis-di-Bandung-by-Pixabay-640x375.jpg" 
+                         alt="Futsal Field" class="w-full h-full object-cover">
+                </div>
+                <div class="w-full h-full flex-shrink-0">
+                    <img src="https://asset.ayo.co.id/image/venue/170987582950787.image_cropper_1709875801634_large.jpg" 
+                         alt="Badminton Court" class="w-full h-full object-cover">
+                </div>
+                <div class="w-full h-full flex-shrink-0">
+                    <img src="https://lifetimedesign.co/wp-content/uploads/2025/06/Lapangan-Padel-1024x555.png" 
+                         alt="Badminton Court" class="w-full h-full object-cover">
+                </div>
+            </div>
+
+            <!-- Slider Indicators -->
+            <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                <button class="slider-dot w-3 h-3 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 transition"></button>
+                <button class="slider-dot w-3 h-3 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 transition"></button>
+                <button class="slider-dot w-3 h-3 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 transition"></button>
+                <button class="slider-dot w-3 h-3 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 transition"></button>
+            </div>
+
+            <!-- Navigation Arrows -->
+            <button id="prev-btn" class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-30 hover:bg-opacity-50 text-white rounded-full w-10 h-10 flex items-center justify-center transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+            <button id="next-btn" class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-30 hover:bg-opacity-50 text-white rounded-full w-10 h-10 flex items-center justify-center transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
@@ -177,5 +225,82 @@
             @endif
         </div>
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sliderContainer = document.getElementById('slider-container');
+            const slides = sliderContainer.querySelectorAll(':scope > div');
+            const dots = document.querySelectorAll('.slider-dot');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+
+            let currentIndex = 0;
+            const totalSlides = slides.length;
+
+            // Function to update slider position
+            function updateSlider() {
+                sliderContainer.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+                // Update active dot
+                dots.forEach((dot, index) => {
+                    if (index === currentIndex) {
+                        dot.classList.add('bg-opacity-100');
+                    } else {
+                        dot.classList.remove('bg-opacity-100');
+                    }
+                });
+            }
+
+            // Auto slide every 5 seconds
+            let autoSlide = setInterval(() => {
+                currentIndex = (currentIndex + 1) % totalSlides;
+                updateSlider();
+            }, 5000);
+
+            // Next button functionality
+            nextBtn.addEventListener('click', function() {
+                clearInterval(autoSlide);
+                currentIndex = (currentIndex + 1) % totalSlides;
+                updateSlider();
+
+                // Restart auto slide
+                autoSlide = setInterval(() => {
+                    currentIndex = (currentIndex + 1) % totalSlides;
+                    updateSlider();
+                }, 5000);
+            });
+
+            // Previous button functionality
+            prevBtn.addEventListener('click', function() {
+                clearInterval(autoSlide);
+                currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+                updateSlider();
+
+                // Restart auto slide
+                autoSlide = setInterval(() => {
+                    currentIndex = (currentIndex + 1) % totalSlides;
+                    updateSlider();
+                }, 5000);
+            });
+
+            // Dot navigation functionality
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', function() {
+                    clearInterval(autoSlide);
+                    currentIndex = index;
+                    updateSlider();
+
+                    // Restart auto slide
+                    autoSlide = setInterval(() => {
+                        currentIndex = (currentIndex + 1) % totalSlides;
+                        updateSlider();
+                    }, 5000);
+                });
+            });
+
+            // Initialize slider
+            updateSlider();
+        });
+    </script>
 </body>
 </html>
