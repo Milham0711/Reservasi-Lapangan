@@ -101,9 +101,8 @@
                                     <option value="" disabled selected>Pilih Jenis Lapangan</option>
                                     <option value="futsal" {{ old('jenis_lapangan') == 'futsal' ? 'selected' : '' }}>Futsal</option>
                                     <option value="badminton" {{ old('jenis_lapangan') == 'badminton' ? 'selected' : '' }}>Badminton</option>
-                                    <option value="Padel" {{ old('jenis_lapangan') == 'Padel' ? 'selected' : '' }}>Padel</option>
                                     <option value="tenis" {{ old('jenis_lapangan') == 'tenis' ? 'selected' : '' }}>Tenis</option>
-                                    <option value="bulu tangkis" {{ old('jenis_lapangan') == 'bulu tangkis' ? 'selected' : '' }}>Bulu Tangkis</option>
+                                    <option value="padel" {{ old('jenis_lapangan') == 'padel' ? 'selected' : '' }}>Padel</option>
                                 </select>
                                 @error('jenis_lapangan')
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>

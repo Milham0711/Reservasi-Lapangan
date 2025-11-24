@@ -57,7 +57,7 @@ class AdminController extends Controller
     {
         $request->validate([
             'nama_lapangan' => 'required|string|max:100',
-            'jenis_lapangan' => 'required|in:futsal,badminton,padel,tenis',
+            'jenis_lapangan' => 'required|in:futsal,badminton,tenis,padel',
             'harga_per_jam' => 'required|numeric|min:0',
             'kapasitas' => 'required|integer|min:1',
             'deskripsi' => 'nullable|string',
@@ -149,7 +149,7 @@ class AdminController extends Controller
 
         $request->validate([
             'nama_lapangan' => 'required|string|max:100',
-            'jenis_lapangan' => 'required|in:futsal,badminton,sepak bola,basket,voli,tenis,bulu tangkis',
+            'jenis_lapangan' => 'required|in:futsal,badminton,tenis,padel',
             'harga_per_jam' => 'required|numeric|min:0',
             'kapasitas' => 'required|integer|min:1',
             'deskripsi' => 'nullable|string',
