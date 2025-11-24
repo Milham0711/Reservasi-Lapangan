@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelola Lapangan - SportVenue</title>
+    <title>Kelola User - SportVenue</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
@@ -38,11 +38,11 @@
                     </svg>
                     <span>Dashboard</span>
                 </a>
-                <a href="{{ route('admin.lapangan.index') }}" class="flex items-center space-x-3 px-4 py-3 bg-blue-50 text-blue-600 rounded-lg mb-2">
+                <a href="{{ route('admin.lapangan.index') }}" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg mb-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                     </svg>
-                    <span class="font-semibold">Kelola Lapangan</span>
+                    <span>Kelola Lapangan</span>
                 </a>
                 <a href="{{ route('admin.reservasi.index') }}" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg mb-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,11 +50,11 @@
                     </svg>
                     <span>Kelola Reservasi</span>
                 </a>
-                <a href="{{ route('admin.users.index') }}" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg mb-2">
+                <a href="{{ route('admin.users.index') }}" class="flex items-center space-x-3 px-4 py-3 bg-blue-50 text-blue-600 rounded-lg mb-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                     </svg>
-                    <span>Kelola User</span>
+                    <span class="font-semibold">Kelola User</span>
                 </a>
                 <a href="{{ route('admin.report.index') }}" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg mb-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,14 +69,14 @@
         <main class="flex-1 p-8">
             <div class="flex items-center justify-between mb-8">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-800">Kelola Lapangan</h1>
-                    <p class="text-gray-600 mt-1">Kelola semua lapangan olahraga</p>
+                    <h1 class="text-3xl font-bold text-gray-800">Kelola User</h1>
+                    <p class="text-gray-600 mt-1">Kelola semua akun pengguna sistem</p>
                 </div>
-                <a href="{{ route('admin.lapangan.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg hover:shadow-xl flex items-center">
+                <a href="{{ route('admin.users.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg hover:shadow-xl flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
-                    Tambah Lapangan
+                    Tambah User
                 </a>
             </div>
 
@@ -91,61 +91,47 @@
             </div>
             @endif
 
-            <!-- Lapangan Table -->
+            <!-- Users Table -->
             <div class="bg-white rounded-xl shadow-md overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50 border-b border-gray-200">
                             <tr>
                                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">ID</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nama Lapangan</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Jenis</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Harga/Jam</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Kapasitas</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nama</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Telepon</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Role</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Alamat</th>
                                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
-                            @foreach($lapangan as $field)
+                            @foreach($users as $user)
                             <tr class="hover:bg-gray-50 transition">
-                                <td class="px-6 py-4 text-sm text-gray-900">{{ $field->lapangan_id_232112 }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-900">{{ $user->user_id_232112 }}</td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center">
-                                        @if($field->gambar_232112)
-                                            <img src="{{ asset($field->gambar_232112) }}" alt="{{ $field->nama_lapangan_232112 }}" class="w-10 h-10 rounded-lg object-cover mr-3">
-                                        @else
-                                            <div class="w-10 h-10 bg-gray-200 rounded-lg mr-3 flex items-center justify-center">
-                                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                                </svg>
-                                            </div>
-                                        @endif
-                                        <span class="text-sm font-medium text-gray-900">{{ $field->nama_lapangan_232112 }}</span>
+                                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                            <span class="text-blue-800 font-semibold">{{ strtoupper(substr($user->nama_232112, 0, 1)) }}</span>
+                                        </div>
+                                        <span class="text-sm font-medium text-gray-900">{{ $user->nama_232112 }}</span>
                                     </div>
                                 </td>
+                                <td class="px-6 py-4 text-sm text-gray-900">{{ $user->email_232112 }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-900">{{ $user->telepon_232112 ?? '-' }}</td>
                                 <td class="px-6 py-4">
-                                    <span class="px-3 py-1 text-xs font-semibold rounded-full capitalize bg-blue-100 text-blue-800">
-                                        {{ $field->jenis_lapangan_232112 }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-sm font-semibold text-gray-900">
-                                    Rp {{ number_format($field->harga_per_jam_232112, 0, ',', '.') }}
-                                </td>
-                                <td class="px-6 py-4 text-sm text-gray-900">{{ $field->kapasitas_232112 }} orang</td>
-                                <td class="px-6 py-4">
-                                    @if($field->status_232112 == 'active')
-                                        <span class="px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Active</span>
-                                    @elseif($field->status_232112 == 'maintenance')
-                                        <span class="px-3 py-1 text-xs font-semibold text-yellow-800 bg-yellow-100 rounded-full">Maintenance</span>
+                                    @if($user->role_232112 == 'admin')
+                                        <span class="px-3 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Admin</span>
                                     @else
-                                        <span class="px-3 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Inactive</span>
+                                        <span class="px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">User</span>
                                     @endif
                                 </td>
+                                <td class="px-6 py-4 text-sm text-gray-900">{{ $user->alamat_232112 ?? '-' }}</td>
                                 <td class="px-6 py-4 text-sm">
                                     <div class="flex space-x-2">
-                                        <a href="{{ route('admin.lapangan.edit', $field->lapangan_id_232112) }}" class="text-blue-600 hover:text-blue-900 font-semibold">Edit</a>
-                                        <form method="POST" action="{{ route('admin.lapangan.destroy', $field->lapangan_id_232112) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus lapangan ini?')">
+                                        <a href="{{ route('admin.users.edit', $user->user_id_232112) }}" class="text-blue-600 hover:text-blue-900 font-semibold">Edit</a>
+                                        <form method="POST" action="{{ route('admin.users.destroy', $user->user_id_232112) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus user ini?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="text-red-600 hover:text-red-900 font-semibold">Hapus</button>
@@ -160,7 +146,7 @@
 
                 <!-- Pagination -->
                 <div class="px-6 py-4 border-t border-gray-200">
-                    {{ $lapangan->links() }}
+                    {{ $users->links() }}
                 </div>
             </div>
         </main>

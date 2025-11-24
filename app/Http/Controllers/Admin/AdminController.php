@@ -277,4 +277,97 @@ class AdminController extends Controller
         $pdf = \PDF::loadView('admin.report.pdf', ['reservasi' => $reservasi])->setPaper('a4', 'landscape');
         return $pdf->download('Laporan_Reservasi_' . date('Y-m-d_H-i-s') . '.pdf');
     }
+
+    // User Management Methods
+    public function usersIndex()
+    {
+        $users = User::orderBy('created_at_232112', 'desc')->paginate(10);
+        return view('admin.users.index', compact('users'));
+    }
+
+    public function usersCreate()
+    {
+        return view('admin.users.create');
+    }
+
+    public function usersStore(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|unique:users_232112,email_232112',
+            'password' => 'required|min:8|confirmed',
+            'phone' => 'nullable|string|max:20',
+            'alamat' => 'nullable|string',
+            'role' => 'required|in:user,admin',
+        ]);
+
+        $data = [
+            'nama_232112' => $request->name,
+            'email_232112' => $request->email,
+            'password_232112' => bcrypt($request->password),
+            'telepon_232112' => $request->phone,
+            'alamat_232112' => $request->alamat,
+            'role_232112' => $request->role,
+            'email_verified_at_232112' => now(),
+        ];
+
+        User::create($data);
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User berhasil ditambahkan');
+    }
+
+    public function usersEdit($id)
+    {
+        $user = User::findOrFail($id);
+        return view('admin.users.edit', compact('user'));
+    }
+
+    public function usersUpdate(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|unique:users_232112,email_232112,' . $id . ',user_id_232112',
+            'password' => 'nullable|min:8|confirmed',
+            'phone' => 'nullable|string|max:20',
+            'alamat' => 'nullable|string',
+            'role' => 'required|in:user,admin',
+        ]);
+
+        $data = [
+            'nama_232112' => $request->name,
+            'email_232112' => $request->email,
+            'telepon_232112' => $request->phone,
+            'alamat_232112' => $request->alamat,
+            'role_232112' => $request->role,
+        ];
+
+        // Only update password if provided
+        if ($request->filled('password')) {
+            $data['password_232112'] = bcrypt($request->password);
+        }
+
+        $user->update($data);
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User berhasil diperbarui');
+    }
+
+    public function usersDelete($id)
+    {
+        $user = User::findOrFail($id);
+
+        // Prevent deletion of current user
+        if ($user->user_id_232112 == auth()->id()) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'Tidak bisa menghapus akun Anda sendiri');
+        }
+
+        $user->delete();
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User berhasil dihapus');
+    }
 }

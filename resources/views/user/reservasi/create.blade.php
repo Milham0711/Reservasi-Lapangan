@@ -113,17 +113,59 @@
                             <input type="date" name="tanggal" id="tanggal" required
                                 min="{{ date('Y-m-d') }}"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                value="{{ old('tanggal') }}">
+                                value="{{ old('tanggal') ?? date('Y-m-d') }}">
                         </div>
+
+                        <!-- Jam Operasional -->
+                        <div class="mb-6 bg-blue-50 p-4 rounded-lg">
+                            <h3 class="font-medium text-gray-700 mb-2">Jam Operasional Lapangan</h3>
+                            <p class="text-sm text-gray-600">06:00 - 23:00</p>
+                        </div>
+
+                        <!-- Jadwal Terisi -->
+                        @if(!empty($occupiedSlots))
+                        <div class="mb-6">
+                            <h3 class="font-medium text-gray-700 mb-2">Jadwal Terisi Hari Ini</h3>
+                            <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                                @foreach($occupiedSlots as $slot)
+                                    <div class="px-3 py-1.5 bg-red-100 text-red-800 text-xs text-center rounded-full border border-red-200">
+                                        {{ \Carbon\Carbon::parse($slot['waktu_mulai_232112'])->format('H:i') }} - {{ \Carbon\Carbon::parse($slot['waktu_selesai_232112'])->format('H:i') }}
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
 
                         <!-- Waktu Mulai -->
                         <div class="mb-6">
                             <label for="waktu_mulai" class="block text-sm font-medium text-gray-700 mb-2">
                                 Waktu Mulai <span class="text-red-500">*</span>
                             </label>
-                            <input type="time" name="waktu_mulai" id="waktu_mulai" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                value="{{ old('waktu_mulai') }}">
+                            <select name="waktu_mulai" id="waktu_mulai" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Pilih Waktu Mulai</option>
+                                @for ($hour = 6; $hour <= 22; $hour++)
+                                    @php
+                                        $time = sprintf('%02d:00', $hour);
+                                        $timeEnd = sprintf('%02d:00', $hour + 1);
+                                        $isOccupied = false;
+
+                                        foreach ($occupiedSlots as $slot) {
+                                            $slotStart = $slot['waktu_mulai_232112'];
+                                            $slotEnd = $slot['waktu_selesai_232112'];
+
+                                            // Cek apakah waktu ini tumpang tindih dengan slot yang sudah terisi
+                                            if ($time >= $slotStart && $time < $slotEnd) {
+                                                $isOccupied = true;
+                                                break;
+                                            }
+                                        }
+                                    @endphp
+                                    <option value="{{ $time }}" {{ old('waktu_mulai') == $time ? 'selected' : '' }} {{ $isOccupied ? 'disabled' : '' }}>
+                                        {{ $time }} - {{ $timeEnd }} {{ $isOccupied ? '(Terisi)' : '' }}
+                                    </option>
+                                @endfor
+                            </select>
                         </div>
 
                         <!-- Waktu Selesai -->
@@ -131,9 +173,11 @@
                             <label for="waktu_selesai" class="block text-sm font-medium text-gray-700 mb-2">
                                 Waktu Selesai <span class="text-red-500">*</span>
                             </label>
-                            <input type="time" name="waktu_selesai" id="waktu_selesai" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                value="{{ old('waktu_selesai') }}">
+                            <select name="waktu_selesai" id="waktu_selesai" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Pilih Waktu Selesai</option>
+                                <!-- Waktu selesai akan diisi secara dinamis oleh JavaScript -->
+                            </select>
                         </div>
 
                         <!-- Catatan -->
@@ -196,18 +240,105 @@
 
     <script>
         const hargaPerJam = {{ $lapangan->harga_per_jam_232112 }};
+        const lapanganId = {{ $lapangan->lapangan_id_232112 }};
+        const tanggalInput = document.getElementById('tanggal');
         const waktuMulai = document.getElementById('waktu_mulai');
         const waktuSelesai = document.getElementById('waktu_selesai');
         const totalHargaEl = document.getElementById('totalHarga');
+        const occupiedSlots = @json($occupiedSlots);
+
+        // Fungsi untuk memeriksa apakah slot waktu terisi
+        function isSlotOccupied(startTime, endTime, date) {
+            for (const slot of occupiedSlots) {
+                // Cek apakah tanggalnya sama
+                if (date === '{{ date("Y-m-d") }}') { // Hanya cek untuk hari ini
+                    const slotStart = slot.waktu_mulai_232112;
+                    const slotEnd = slot.waktu_selesai_232112;
+
+                    // Cek apakah waktu baru tumpang tindih dengan waktu yang sudah terisi
+                    if (startTime < slotEnd && endTime > slotStart) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        // Fungsi untuk memperbarui opsi waktu selesai berdasarkan waktu mulai
+        function updateWaktuSelesaiOptions() {
+            // Kosongkan opsi sebelumnya
+            waktuSelesai.innerHTML = '<option value="">Pilih Waktu Selesai</option>';
+
+            if (!waktuMulai.value) return;
+
+            // Dapatkan tanggal yang dipilih
+            const selectedDate = tanggalInput.value;
+
+            // Tentukan waktu selesai terakhir yang mungkin (23:00)
+            const startHour = parseInt(waktuMulai.value.split(':')[0]);
+
+            // Tambahkan opsi waktu selesai dari 1 jam setelah waktu mulai hingga 23:00
+            for (let hour = startHour + 1; hour <= 23; hour++) {
+                const endTime = String(hour).padStart(2, '0') + ':00';
+                const startTime = waktuMulai.value;
+
+                // Cek apakah slot ini terisi
+                const isOccupied = isSlotOccupied(startTime, endTime, selectedDate);
+
+                const option = document.createElement('option');
+                option.value = endTime;
+                option.textContent = endTime + (isOccupied ? ' (Terisi)' : '');
+                option.disabled = isOccupied;
+
+                waktuSelesai.appendChild(option);
+            }
+        }
+
+        // Fungsi untuk memperbarui opsi waktu mulai saat tanggal berubah
+        function updateWaktuMulaiOptions() {
+            const selectedDate = tanggalInput.value;
+            const options = waktuMulai.querySelectorAll('option');
+
+            // Dapatkan data slot terisi baru berdasarkan tanggal
+            fetch(`/api/occupied-slots/${lapanganId}/${selectedDate}`)
+                .then(response => response.json())
+                .then(newOccupiedSlots => {
+                    // Update setiap opsi waktu mulai
+                    options.forEach(option => {
+                        const time = option.value;
+                        if (time) {
+                            // Cek apakah waktu ini tumpang tindih dengan slot yang sudah terisi
+                            let isOccupied = false;
+                            newOccupiedSlots.forEach(slot => {
+                                const slotStart = slot.waktu_mulai_232112;
+                                const slotEnd = slot.waktu_selesai_232112;
+                                if (time >= slotStart && time < slotEnd) {
+                                    isOccupied = true;
+                                }
+                            });
+
+                            option.disabled = isOccupied;
+                            // Update teks opsi
+                            const baseText = option.text.replace(' (Terisi)', '');
+                            option.textContent = isOccupied ? `${baseText} (Terisi)` : baseText;
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching occupied slots:', error);
+                });
+        }
 
         function hitungTotal() {
             if (waktuMulai.value && waktuSelesai.value) {
-                const mulai = new Date('2000-01-01 ' + waktuMulai.value);
-                const selesai = new Date('2000-01-01 ' + waktuSelesai.value);
-                const diff = (selesai - mulai) / (1000 * 60 * 60); // dalam jam
-                
-                if (diff > 0) {
-                    const total = diff * hargaPerJam;
+                const [startHour, startMinute] = waktuMulai.value.split(':').map(Number);
+                const [endHour, endMinute] = waktuSelesai.value.split(':').map(Number);
+
+                // Hitung durasi dalam jam
+                const diffHours = (endHour - startHour) + ((endMinute - startMinute) / 60);
+
+                if (diffHours > 0) {
+                    const total = diffHours * hargaPerJam;
                     totalHargaEl.textContent = 'Rp ' + total.toLocaleString('id-ID');
                 } else {
                     totalHargaEl.textContent = 'Rp 0';
@@ -215,8 +346,26 @@
             }
         }
 
-        waktuMulai.addEventListener('change', hitungTotal);
-        waktuSelesai.addEventListener('change', hitungTotal);
+        // Event listener
+        tanggalInput.addEventListener('change', function() {
+            updateWaktuMulaiOptions();
+            updateWaktuSelesaiOptions(); // Perbarui juga opsi selesai
+            hitungTotal(); // Hitung ulang estimasi harga
+        });
+
+        waktuMulai.addEventListener('change', function() {
+            updateWaktuSelesaiOptions();
+            hitungTotal();
+        });
+
+        waktuSelesai.addEventListener('change', function() {
+            hitungTotal();
+        });
+
+        // Inisialisasi
+        document.addEventListener('DOMContentLoaded', function() {
+            updateWaktuSelesaiOptions();
+        });
     </script>
 </body>
 </html>

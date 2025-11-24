@@ -44,6 +44,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/report/data', [AdminController::class, 'reportData'])->name('report.data');
     Route::post('/report/export/excel', [AdminController::class, 'exportExcel'])->name('report.export.excel');
     Route::post('/report/export/pdf', [AdminController::class, 'exportPdf'])->name('report.export.pdf');
+
+    // User Management
+    Route::get('/users', [AdminController::class, 'usersIndex'])->name('users.index');
+    Route::get('/users/create', [AdminController::class, 'usersCreate'])->name('users.create');
+    Route::post('/users', [AdminController::class, 'usersStore'])->name('users.store');
+    Route::get('/users/{id}/edit', [AdminController::class, 'usersEdit'])->name('users.edit');
+    Route::put('/users/{id}', [AdminController::class, 'usersUpdate'])->name('users.update');
+    Route::delete('/users/{id}', [AdminController::class, 'usersDelete'])->name('users.destroy');
 });
 
 // User Routes
@@ -58,6 +66,7 @@ Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
     Route::get('/reservasi', [UserController::class, 'reservasiIndex'])->name('reservasi.index');
     Route::get('/reservasi/create/{lapanganId}', [UserController::class, 'reservasiCreate'])->name('reservasi.create');
     Route::post('/reservasi', [UserController::class, 'reservasiStore'])->name('reservasi.store');
+    Route::get('/api/occupied-slots/{lapanganId}/{tanggal}', [UserController::class, 'getOccupiedSlots'])->name('api.occupied.slots');
     Route::post('/midtrans/webhook', [UserController::class, 'handleMidtransWebhook'])->name('midtrans.webhook');
     Route::post('/reservasi/{id}/confirm-payment', [UserController::class, 'confirmPayment'])->name('user.reservasi.confirm-payment');
     Route::get('/reservasi/{id}/pay', [UserController::class, 'showPaymentPage'])->name('reservasi.pay');

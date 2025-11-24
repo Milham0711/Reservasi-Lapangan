@@ -64,7 +64,11 @@ class UserController extends Controller
     public function reservasiCreate($lapanganId)
     {
         $lapangan = Lapangan::findOrFail($lapanganId);
-        return view('user.reservasi.create', compact('lapangan'));
+
+        // Dapatkan semua reservasi yang sudah ada untuk lapangan ini
+        $occupiedSlots = \App\Models\Reservasi::getOccupiedTimeSlots($lapanganId, date('Y-m-d'))->toArray();
+
+        return view('user.reservasi.create', compact('lapangan', 'occupiedSlots'));
     }
 
     public function reservasiStore(Request $request)
@@ -85,6 +89,11 @@ class UserController extends Controller
         ]);
 
         $lapangan = Lapangan::findOrFail($request->lapangan_id);
+
+        // Check if the time slot is available
+        if (!Reservasi::isTimeSlotAvailable($request->lapangan_id, $request->tanggal, $request->waktu_mulai, $request->waktu_selesai)) {
+            return back()->withErrors(['waktu_mulai' => 'Waktu yang dipilih sudah dipesan oleh pengguna lain. Silakan pilih waktu lain.']);
+        }
 
         // Hitung durasi dan total harga (with better precision)
         $waktuMulai = Carbon::parse($request->tanggal . ' ' . $request->waktu_mulai);
@@ -196,6 +205,12 @@ class UserController extends Controller
         return redirect()->route('user.reservasi.index')
             ->with('success', 'Reservasi berhasil dibuat. ' .
                   ($request->metode_pembayaran === 'cash' ? 'Silakan bayar di lokasi.' : 'Silakan selesaikan pembayaran.'));
+    }
+
+    public function getOccupiedSlots($lapanganId, $tanggal)
+    {
+        $occupiedSlots = \App\Models\Reservasi::getOccupiedTimeSlots($lapanganId, $tanggal);
+        return response()->json($occupiedSlots);
     }
 
     public function handleMidtransWebhook(Request $request)
