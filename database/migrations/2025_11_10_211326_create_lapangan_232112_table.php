@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('lapangan_232112', function (Blueprint $table) {
             $table->id('lapangan_id_232112');
             $table->string('nama_lapangan_232112', 100);
-            $table->enum('jenis_lapangan_232112', ['futsal', 'badminton', 'sepak bola', 'basket', 'voli', 'tenis', 'bulu tangkis']);
+            $table->enum('jenis_lapangan_232112', ['futsal', 'badminton', 'Padel', 'tenis',]);
             $table->decimal('harga_per_jam_232112', 10, 2);
             $table->text('deskripsi_232112')->nullable();
             $table->enum('status_232112', ['active', 'maintenance', 'inactive'])->default('active');

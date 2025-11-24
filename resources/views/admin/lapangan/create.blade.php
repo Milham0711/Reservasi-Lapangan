@@ -101,9 +101,7 @@
                                     <option value="" disabled selected>Pilih Jenis Lapangan</option>
                                     <option value="futsal" {{ old('jenis_lapangan') == 'futsal' ? 'selected' : '' }}>Futsal</option>
                                     <option value="badminton" {{ old('jenis_lapangan') == 'badminton' ? 'selected' : '' }}>Badminton</option>
-                                    <option value="sepak bola" {{ old('jenis_lapangan') == 'sepak bola' ? 'selected' : '' }}>Sepak Bola</option>
-                                    <option value="basket" {{ old('jenis_lapangan') == 'basket' ? 'selected' : '' }}>Basket</option>
-                                    <option value="voli" {{ old('jenis_lapangan') == 'voli' ? 'selected' : '' }}>Voli</option>
+                                    <option value="Padel" {{ old('jenis_lapangan') == 'Padel' ? 'selected' : '' }}>Padel</option>
                                     <option value="tenis" {{ old('jenis_lapangan') == 'tenis' ? 'selected' : '' }}>Tenis</option>
                                     <option value="bulu tangkis" {{ old('jenis_lapangan') == 'bulu tangkis' ? 'selected' : '' }}>Bulu Tangkis</option>
                                 </select>

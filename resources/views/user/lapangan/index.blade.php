@@ -49,10 +49,8 @@
                         <option value="">Semua Jenis</option>
                         <option value="futsal" {{ request('jenis') == 'futsal' ? 'selected' : '' }}>Futsal</option>
                         <option value="badminton" {{ request('jenis') == 'badminton' ? 'selected' : '' }}>Badminton</option>
-                        <option value="sepak bola" {{ request('jenis') == 'sepak bola' ? 'selected' : '' }}>Sepak Bola</option>
-                        <option value="basket" {{ request('jenis') == 'basket' ? 'selected' : '' }}>Basket</option>
-                        <option value="voli" {{ request('jenis') == 'voli' ? 'selected' : '' }}>Voli</option>
                         <option value="tenis" {{ request('jenis') == 'tenis' ? 'selected' : '' }}>Tenis</option>
+                        <option value="padel" {{ request('jenis') == 'padel' ? 'selected' : '' }}>Padel</option>
                     </select>
                 </div>
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition">

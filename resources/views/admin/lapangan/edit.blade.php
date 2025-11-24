@@ -102,11 +102,8 @@
                                     <option value="" disabled>Pilih Jenis Lapangan</option>
                                     <option value="futsal" {{ old('jenis_lapangan', $lapangan->jenis_lapangan_232112) == 'futsal' ? 'selected' : '' }}>Futsal</option>
                                     <option value="badminton" {{ old('jenis_lapangan', $lapangan->jenis_lapangan_232112) == 'badminton' ? 'selected' : '' }}>Badminton</option>
-                                    <option value="sepak bola" {{ old('jenis_lapangan', $lapangan->jenis_lapangan_232112) == 'sepak bola' ? 'selected' : '' }}>Sepak Bola</option>
-                                    <option value="basket" {{ old('jenis_lapangan', $lapangan->jenis_lapangan_232112) == 'basket' ? 'selected' : '' }}>Basket</option>
-                                    <option value="voli" {{ old('jenis_lapangan', $lapangan->jenis_lapangan_232112) == 'voli' ? 'selected' : '' }}>Voli</option>
+                                    <option value="Padel" {{ old('jenis_lapangan', $lapangan->jenis_lapangan_232112) == 'Padel' ? 'selected' : '' }}>Padel</option>
                                     <option value="tenis" {{ old('jenis_lapangan', $lapangan->jenis_lapangan_232112) == 'tenis' ? 'selected' : '' }}>Tenis</option>
-                                    <option value="bulu tangkis" {{ old('jenis_lapangan', $lapangan->jenis_lapangan_232112) == 'bulu tangkis' ? 'selected' : '' }}>Bulu Tangkis</option>
                                 </select>
                                 @error('jenis_lapangan')
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>

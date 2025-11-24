@@ -134,7 +134,7 @@
         </div>
 
         <!-- Quick Actions -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <a href="{{ route('user.lapangan.index', ['jenis' => 'futsal']) }}" class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition group">
                 <div class="flex items-center space-x-4">
                     <div class="bg-blue-100 p-4 rounded-full group-hover:bg-blue-200 transition">
@@ -163,6 +163,38 @@
                     </div>
                 </div>
             </a>
+
+            <a href="{{ route('user.lapangan.index', ['jenis' => 'tenis']) }}" class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition group">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-purple-100 p-4 rounded-full group-hover:bg-purple-200 transition">
+                        <svg class="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.004a2.889 2.889 0 00-3.985-.009 2.889 2.889 0 00-.01 3.993zM3.75 21V4.125C3.75 3.504 4.254 3 4.875 3h14.25c.621 0 1.125.504 1.125 1.125v16.875H3.75z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800">Booking Tenis</h3>
+                        <p class="text-gray-600 text-sm">Lihat & booking lapangan tenis</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ route('user.lapangan.index', ['jenis' => 'padel']) }}" class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition group">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-yellow-100 p-4 rounded-full group-hover:bg-yellow-200 transition">
+                        <svg class="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800">Booking Padel</h3>
+                        <p class="text-gray-600 text-sm">Lihat & booking lapangan padel</p>
+                    </div>
+                </div>
+            </a>
+
+
+
+
         </div>
 
         <!-- Recent Reservations -->
