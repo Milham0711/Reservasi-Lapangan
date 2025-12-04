@@ -162,7 +162,7 @@
                                         }
                                     @endphp
                                     <option value="{{ $time }}" {{ old('waktu_mulai') == $time ? 'selected' : '' }} {{ $isOccupied ? 'disabled' : '' }}>
-                                        {{ $time }} - {{ $timeEnd }} {{ $isOccupied ? '(Terisi)' : '' }}
+                                        {{ $time }} {{ $isOccupied ? '(Terisi)' : '' }}
                                     </option>
                                 @endfor
                             </select>
@@ -264,6 +264,7 @@
             return false;
         }
 
+
         // Fungsi untuk memperbarui opsi waktu selesai berdasarkan waktu mulai
         function updateWaktuSelesaiOptions() {
             // Kosongkan opsi sebelumnya
@@ -343,6 +344,8 @@
                 } else {
                     totalHargaEl.textContent = 'Rp 0';
                 }
+            } else {
+                totalHargaEl.textContent = 'Rp 0';
             }
         }
 

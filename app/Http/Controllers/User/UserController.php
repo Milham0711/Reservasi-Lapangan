@@ -90,22 +90,31 @@ class UserController extends Controller
 
         $lapangan = Lapangan::findOrFail($request->lapangan_id);
 
+        $waktuSelesai = $request->waktu_selesai;
+
+        // Validate that the end time doesn't exceed operational hours (06:00 - 23:00)
+        $startHour = intval(explode(':', $request->waktu_mulai)[0]);
+        $endHour = intval(explode(':', $request->waktu_selesai)[0]);
+        if ($endHour > 23) {
+            return back()->withErrors(['waktu_selesai' => 'Waktu selesai melebihi jam operasional. Maksimal jam 23:00.']);
+        }
+
         // Check if the time slot is available
-        if (!Reservasi::isTimeSlotAvailable($request->lapangan_id, $request->tanggal, $request->waktu_mulai, $request->waktu_selesai)) {
+        if (!Reservasi::isTimeSlotAvailable($request->lapangan_id, $request->tanggal, $request->waktu_mulai, $waktuSelesai)) {
             return back()->withErrors(['waktu_mulai' => 'Waktu yang dipilih sudah dipesan oleh pengguna lain. Silakan pilih waktu lain.']);
         }
 
         // Hitung durasi dan total harga (with better precision)
         $waktuMulai = Carbon::parse($request->tanggal . ' ' . $request->waktu_mulai);
-        $waktuSelesai = Carbon::parse($request->tanggal . ' ' . $request->waktu_selesai);
+        $waktuSelesaiObj = Carbon::parse($request->tanggal . ' ' . $waktuSelesai);
 
         // Validate that end time is after start time
-        if ($waktuSelesai->lte($waktuMulai)) {
+        if ($waktuSelesaiObj->lte($waktuMulai)) {
             return back()->withErrors(['waktu_selesai' => 'Waktu selesai harus lebih lama dari waktu mulai.']);
         }
 
-        // Calculate duration in hours using interval to avoid negative issues
-        $interval = $waktuMulai->diff($waktuSelesai);
+        // Calculate duration in hours
+        $interval = $waktuMulai->diff($waktuSelesaiObj);
         $durasi = ($interval->h + ($interval->days * 24)) + ($interval->i / 60) + ($interval->s / 3600);
 
         // Ensure the hourly rate is positive before calculation
@@ -121,7 +130,7 @@ class UserController extends Controller
             'lapangan_id_232112' => $request->lapangan_id,
             'tanggal_reservasi_232112' => $request->tanggal,
             'waktu_mulai_232112' => $request->waktu_mulai,
-            'waktu_selesai_232112' => $request->waktu_selesai,
+            'waktu_selesai_232112' => $waktuSelesai,
             'total_harga_232112' => $totalHarga,
             'status_reservasi_232112' => 'pending',
             'catatan_232112' => $request->catatan,
