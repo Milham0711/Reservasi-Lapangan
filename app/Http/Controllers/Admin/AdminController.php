@@ -330,7 +330,7 @@ class AdminController extends Controller
             }
         }
 
-        // Determine the chart type and generate appropriate data
+        // Determine the chart type and generate appropriate data based on filters applied
         // If custom date range is provided, determine the best visualization based on date range
         if ($startDate && $endDate) {
             $start = \Carbon\Carbon::parse($startDate);
@@ -409,20 +409,27 @@ class AdminController extends Controller
             // Generate chart data based on the selected period type
             switch ($periodType) {
                 case 'daily':
-                    // Get hourly income data for today
+                    // Get hourly income data for today - ensure all 24 hours are represented
+                    // When showing income per hour, we calculate based on reservations made for that date
                     for ($hour = 0; $hour < 24; $hour++) {
-                        $start = today()->setHour($hour)->setMinute(0)->setSecond(0);
-                        $end = $start->copy()->addHour();
+                        $hourStart = today()->setHour($hour)->setMinute(0)->setSecond(0);
+                        $hourEnd = $hourStart->copy()->addHour();
 
+                        // Find reservations that were made for today's date and start in this hour
                         $income = Reservasi::whereIn('status_reservasi_232112', ['confirmed', 'completed'])
-                            ->whereBetween('tanggal_reservasi_232112', [$start, $end])
+                            ->whereDate('tanggal_reservasi_232112', today())
+                            ->whereTime('waktu_mulai_232112', '>=', $hourStart->format('H:i'))
+                            ->whereTime('waktu_mulai_232112', '<', $hourEnd->format('H:i'))
                             ->sum('total_harga_232112');
 
-                        $reservasiCount = Reservasi::whereBetween('tanggal_reservasi_232112', [$start, $end])
+                        $reservasiCount = Reservasi::whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+                            ->whereDate('tanggal_reservasi_232112', today())
+                            ->whereTime('waktu_mulai_232112', '>=', $hourStart->format('H:i'))
+                            ->whereTime('waktu_mulai_232112', '<', $hourEnd->format('H:i'))
                             ->count();
 
                         $chartData[] = [
-                            'label' => $start->format('H:00'),
+                            'label' => $hourStart->format('H:00'),
                             'income' => $income,
                             'reservasi' => $reservasiCount
                         ];
@@ -430,7 +437,7 @@ class AdminController extends Controller
                     break;
 
                 case 'weekly':
-                    // Get daily income data for the week
+                    // Get daily income data for the week - ensure all 7 days are represented
                     $startOfWeek = now()->startOfWeek();
                     for ($i = 0; $i < 7; $i++) {
                         $date = $startOfWeek->copy()->addDays($i);
@@ -452,7 +459,7 @@ class AdminController extends Controller
                     break;
 
                 case 'yearly':
-                    // Get monthly income data for the year
+                    // Get monthly income data for the year - ensure all 12 months are represented
                     for ($i = 0; $i < 12; $i++) {
                         $month = now()->startOfYear()->addMonths($i);
 
@@ -476,7 +483,7 @@ class AdminController extends Controller
 
                 default: // monthly
                 case 'monthly':
-                    // Get daily income data for the month
+                    // Get daily income data for the month - ensure all days are represented
                     $daysInMonth = now()->daysInMonth;
                     for ($i = 1; $i <= $daysInMonth; $i++) {
                         $date = now()->startOfMonth()->addDays($i - 1);

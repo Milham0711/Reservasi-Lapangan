@@ -256,7 +256,7 @@
                     monthlyIncomeChart = new Chart(monthlyIncomeCtx, {
                         type: 'line',
                         data: {
-                            labels: data.chartData.map(item => item.day || item.label),
+                            labels: data.chartData.map(item => item.month || item.day || item.label),
                             datasets: [{
                                 label: 'Pendapatan',
                                 data: data.chartData.map(item => item.income),
