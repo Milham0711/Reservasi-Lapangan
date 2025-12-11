@@ -73,6 +73,38 @@
                 <p class="text-gray-600 mt-1">Statistik pendapatan dan aktivitas reservasi</p>
             </div>
 
+            <!-- Filter Controls -->
+            <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+                    <h2 class="text-xl font-bold text-gray-800">Filter Laporan</h2>
+                    <div class="flex flex-wrap gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Periode</label>
+                            <select id="periodType" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="all" {{ request('period_type') == 'all' ? 'selected' : '' }}>Semua Waktu</option>
+                                <option value="daily" {{ request('period_type') == 'daily' ? 'selected' : '' }}>Harian</option>
+                                <option value="weekly" {{ request('period_type') == 'weekly' ? 'selected' : '' }}>Mingguan</option>
+                                <option value="monthly" {{ request('period_type') == 'monthly' ? 'selected' : '' }}>Bulanan</option>
+                                <option value="yearly" {{ request('period_type') == 'yearly' ? 'selected' : '' }}>Tahunan</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Awal</label>
+                            <input type="date" id="startDate" value="{{ request('start_date') }}" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Akhir</label>
+                            <input type="date" id="endDate" value="{{ request('end_date') }}" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="flex items-end">
+                            <button id="applyFilter" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition">
+                                Terapkan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Stats Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div class="bg-white rounded-xl shadow-md p-6">
@@ -97,8 +129,8 @@
                             </svg>
                         </div>
                         <div class="ml-4">
-                            <h3 class="text-sm font-medium text-gray-600">Pendapatan Bulan Ini</h3>
-                            <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($totalPendapatanBulanIni, 0, ',', '.') }}</p>
+                            <h3 class="text-sm font-medium text-gray-600">Pendapatan {{ $currentPeriodLabel ?? 'Periode Ini' }}</h3>
+                            <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($totalPendapatanCurrentPeriod, 0, ',', '.') }}</p>
                         </div>
                     </div>
                 </div>
@@ -125,8 +157,8 @@
                             </svg>
                         </div>
                         <div class="ml-4">
-                            <h3 class="text-sm font-medium text-gray-600">Reservasi Bulan Ini</h3>
-                            <p class="text-2xl font-bold text-gray-900">{{ $totalReservasiBulanIni }}</p>
+                            <h3 class="text-sm font-medium text-gray-600">Reservasi {{ $currentPeriodLabel ?? 'Periode Ini' }}</h3>
+                            <p class="text-2xl font-bold text-gray-900">{{ $totalReservasiCurrentPeriod }}</p>
                         </div>
                     </div>
                 </div>
@@ -137,8 +169,11 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
                     <h2 class="text-xl font-bold text-gray-800 mb-4 sm:mb-0">Ekspor Laporan</h2>
                     <div class="flex space-x-4">
-                        <form method="POST" action="{{ route('admin.report.export.excel') }}" class="inline">
+                        <form id="exportExcelForm" method="POST" action="{{ route('admin.report.export.excel') }}" class="inline">
                             @csrf
+                            <input type="hidden" id="exportPeriodType" name="period_type" value="{{ request('period_type', 'all') }}">
+                            <input type="hidden" id="exportStartDate" name="start_date" value="{{ request('start_date') }}">
+                            <input type="hidden" id="exportEndDate" name="end_date" value="{{ request('end_date') }}">
                             <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg hover:shadow-xl flex items-center">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -146,8 +181,11 @@
                                 Ekspor ke Excel
                             </button>
                         </form>
-                        <form method="POST" action="{{ route('admin.report.export.pdf') }}" class="inline">
+                        <form id="exportPdfForm" method="POST" action="{{ route('admin.report.export.pdf') }}" class="inline">
                             @csrf
+                            <input type="hidden" id="exportPeriodTypePdf" name="period_type" value="{{ request('period_type', 'all') }}">
+                            <input type="hidden" id="exportStartDatePdf" name="start_date" value="{{ request('start_date') }}">
+                            <input type="hidden" id="exportEndDatePdf" name="end_date" value="{{ request('end_date') }}">
                             <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg hover:shadow-xl flex items-center">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -181,83 +219,134 @@
     </div>
 
     <script>
-        // Fetch report data
-        fetch("{{ route('admin.report.data') }}")
-            .then(response => response.json())
-            .then(data => {
-                // Monthly Income Chart
-                const monthlyIncomeCtx = document.getElementById('monthlyIncomeChart').getContext('2d');
-                new Chart(monthlyIncomeCtx, {
-                    type: 'line',
-                    data: {
-                        labels: data.monthlyData.map(item => item.month),
-                        datasets: [{
-                            label: 'Pendapatan',
-                            data: data.monthlyData.map(item => item.income),
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: function(value) {
-                                        return 'Rp ' + value.toLocaleString();
-                                    }
-                                }
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    }
-                });
+        let monthlyIncomeChart = null;
+        let topLapanganChart = null;
 
-                // Top Lapangan Chart
-                const topLapanganCtx = document.getElementById('topLapanganChart').getContext('2d');
-                new Chart(topLapanganCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.topLapangan.map(item => item.nama_lapangan_232112),
-                        datasets: [{
-                            label: 'Pendapatan',
-                            data: data.topLapangan.map(item => item.total_income),
-                            backgroundColor: '#10b981',
-                            borderColor: '#059669',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        indexAxis: 'y',
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: function(value) {
-                                        return 'Rp ' + value.toLocaleString();
+        // Function to fetch and update report data
+        function updateReportData() {
+            // Get filter values
+            const periodType = document.getElementById('periodType').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            // Update export form hidden fields
+            document.getElementById('exportPeriodType').value = periodType;
+            document.getElementById('exportStartDate').value = startDate;
+            document.getElementById('exportEndDate').value = endDate;
+            document.getElementById('exportPeriodTypePdf').value = periodType;
+            document.getElementById('exportStartDatePdf').value = startDate;
+            document.getElementById('exportEndDatePdf').value = endDate;
+
+            // Build query parameters
+            const params = new URLSearchParams();
+            if (periodType) params.append('period_type', periodType);
+            if (startDate) params.append('start_date', startDate);
+            if (endDate) params.append('end_date', endDate);
+
+            // Fetch report data
+            fetch("{{ route('admin.report.data') }}?" + params.toString())
+                .then(response => response.json())
+                .then(data => {
+                    // Update Monthly Income Chart
+                    if (monthlyIncomeChart) {
+                        monthlyIncomeChart.destroy();
+                    }
+
+                    const monthlyIncomeCtx = document.getElementById('monthlyIncomeChart').getContext('2d');
+                    monthlyIncomeChart = new Chart(monthlyIncomeCtx, {
+                        type: 'line',
+                        data: {
+                            labels: data.chartData.map(item => item.day || item.label),
+                            datasets: [{
+                                label: 'Pendapatan',
+                                data: data.chartData.map(item => item.income),
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return 'Rp ' + value.toLocaleString();
+                                        }
                                     }
                                 }
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                display: false
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
                             }
                         }
+                    });
+
+                    // Update Top Lapangan Chart
+                    if (topLapanganChart) {
+                        topLapanganChart.destroy();
                     }
-                });
-            })
-            .catch(error => console.error('Error fetching data:', error));
+
+                    const topLapanganCtx = document.getElementById('topLapanganChart').getContext('2d');
+                    topLapanganChart = new Chart(topLapanganCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.topLapangan.map(item => item.nama_lapangan_232112),
+                            datasets: [{
+                                label: 'Pendapatan',
+                                data: data.topLapangan.map(item => item.total_income),
+                                backgroundColor: '#10b981',
+                                borderColor: '#059669',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return 'Rp ' + value.toLocaleString();
+                                        }
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        // Apply filter button event
+        document.getElementById('applyFilter').addEventListener('click', updateReportData);
+
+        // When period type changes, update date fields as needed
+        document.getElementById('periodType').addEventListener('change', function() {
+            const periodType = this.value;
+            // When "all" is selected, allow custom dates but clear if not needed
+            if (periodType === 'all') {
+                // For "all" period, dates are optional but can remain if user wants
+            } else {
+                // For other periods, user may want to clear custom dates for clarity
+                // But we don't force clear to let user decide
+            }
+        });
+
+        // Initialize charts on page load
+        updateReportData();
     </script>
 </body>
 </html>

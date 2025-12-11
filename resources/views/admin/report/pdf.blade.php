@@ -54,6 +54,8 @@
 <body>
     <div class="header">
         <h1>Laporan Reservasi Lapangan</h1>
+        <p>Periode: {{ $periodeInfo ?? 'Semua Waktu' }}</p>
+        <p>Total Pendapatan: Rp {{ number_format($totalPendapatan ?? 0, 0, ',', '.') }}</p>
         <p>Dicetak pada: {{ now()->format('d M Y H:i:s') }}</p>
     </div>
 

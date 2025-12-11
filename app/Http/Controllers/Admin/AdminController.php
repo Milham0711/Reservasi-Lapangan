@@ -199,82 +199,579 @@ class AdminController extends Controller
             ->with('success', 'Lapangan berhasil dihapus');
     }
 
-    public function report()
+    public function report(Request $request)
     {
-        // Get basic statistics for the reporting page
-        $totalReservasi = Reservasi::count();
-        // Include both confirmed and completed reservations for income calculation
-        $totalPendapatan = Reservasi::whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+        // Get date range and period type from request
+        $periodType = $request->input('period_type', 'all'); // all, daily, weekly, monthly, yearly
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        // Base query for reservations
+        $baseQuery = Reservasi::query();
+
+        // Apply date range filter if provided
+        if ($startDate && $endDate) {
+            // If both start and end date are provided, use the date range
+            $baseQuery->whereBetween('tanggal_reservasi_232112', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            // If only start date is provided, use from start date to now
+            $baseQuery->whereDate('tanggal_reservasi_232112', '>=', $startDate);
+        } elseif ($endDate) {
+            // If only end date is provided, use from beginning to end date
+            $baseQuery->whereDate('tanggal_reservasi_232112', '<=', $endDate);
+        } elseif ($periodType !== 'all') {
+            // Apply period type filter only if no custom date range is specified
+            switch ($periodType) {
+                case 'daily':
+                    $baseQuery->whereDate('tanggal_reservasi_232112', today());
+                    break;
+                case 'weekly':
+                    $baseQuery->whereBetween('tanggal_reservasi_232112', [now()->startOfWeek(), now()->endOfWeek()]);
+                    break;
+                case 'monthly':
+                    $baseQuery->whereMonth('tanggal_reservasi_232112', now()->month)
+                              ->whereYear('tanggal_reservasi_232112', now()->year);
+                    break;
+                case 'yearly':
+                    $baseQuery->whereYear('tanggal_reservasi_232112', now()->year);
+                    break;
+            }
+        }
+
+        // Get basic statistics with applied filters
+        $totalReservasi = $baseQuery->count();
+        $totalPendapatan = $baseQuery->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
             ->sum('total_harga_232112');
-        $totalPendapatanBulanIni = Reservasi::whereIn('status_reservasi_232112', ['confirmed', 'completed'])
-            ->whereMonth('created_at_232112', now()->month)
-            ->whereYear('created_at_232112', now()->year)
-            ->sum('total_harga_232112');
-        $totalReservasiBulanIni = Reservasi::whereMonth('created_at_232112', now()->month)
-            ->whereYear('created_at_232112', now()->year)
-            ->count();
+
+        // Set appropriate label based on filters applied
+        if ($startDate && $endDate) {
+            // Custom date range
+            $currentPeriodLabel = 'Periode ' . \Carbon\Carbon::parse($startDate)->format('d M Y') . ' - ' . \Carbon\Carbon::parse($endDate)->format('d M Y');
+        } elseif ($startDate) {
+            // Only start date provided
+            $currentPeriodLabel = 'Sejak ' . \Carbon\Carbon::parse($startDate)->format('d M Y');
+        } elseif ($endDate) {
+            // Only end date provided
+            $currentPeriodLabel = 'Sampai ' . \Carbon\Carbon::parse($endDate)->format('d M Y');
+        } else {
+            // Period type filter applied
+            switch ($periodType) {
+                case 'daily':
+                    $currentPeriodLabel = 'Hari Ini';
+                    break;
+                case 'weekly':
+                    $currentPeriodLabel = 'Minggu Ini';
+                    break;
+                case 'monthly':
+                    $currentPeriodLabel = 'Bulan Ini';
+                    break;
+                case 'yearly':
+                    $currentPeriodLabel = 'Tahun Ini';
+                    break;
+                default:
+                    $currentPeriodLabel = 'Semua Waktu';
+                    break;
+            }
+        }
+
+        // Pass current period type to the view
+        $currentPeriodType = $periodType;
 
         return view('admin.report.index', compact(
             'totalReservasi',
             'totalPendapatan',
-            'totalPendapatanBulanIni',
-            'totalReservasiBulanIni'
-        ));
+            'currentPeriodType',
+            'currentPeriodLabel',
+            'startDate',
+            'endDate'
+        ) + [
+            'totalPendapatanCurrentPeriod' => $totalPendapatan, // Using the same total for consistency
+            'totalReservasiCurrentPeriod' => $totalReservasi, // Using the same total for consistency
+        ]);
     }
 
-    public function reportData()
+    public function reportData(Request $request)
     {
-        // Get data for charts - last 12 months income
+        // Get date range and period type from request
+        $periodType = $request->input('period_type', 'monthly'); // default to monthly
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
         $chartData = [];
-        for ($i = 11; $i >= 0; $i--) {
-            $month = now()->subMonths($i);
-            $monthName = $month->format('M Y');
 
-            $income = Reservasi::whereIn('status_reservasi_232112', ['confirmed', 'completed'])
-                ->whereYear('created_at_232112', $month->year)
-                ->whereMonth('created_at_232112', $month->month)
-                ->sum('total_harga_232112');
+        // Base query for reservations
+        $baseQuery = Reservasi::whereIn('status_reservasi_232112', ['confirmed', 'completed']);
 
-            $reservasiCount = Reservasi::whereYear('created_at_232112', $month->year)
-                ->whereMonth('created_at_232112', $month->month)
-                ->count();
-
-            $chartData[] = [
-                'month' => $monthName,
-                'income' => $income,
-                'reservasi' => $reservasiCount
-            ];
+        // Apply date range filter if provided
+        if ($startDate && $endDate) {
+            $baseQuery->whereBetween('tanggal_reservasi_232112', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            // If only start date is provided, use from start date to now
+            $baseQuery->whereDate('tanggal_reservasi_232112', '>=', $startDate);
+        } elseif ($endDate) {
+            // If only end date is provided, use from beginning to end date
+            $baseQuery->whereDate('tanggal_reservasi_232112', '<=', $endDate);
+        } elseif ($periodType !== 'all') {
+            // Apply period type filter only if no custom date range is specified
+            switch ($periodType) {
+                case 'daily':
+                    $baseQuery->whereDate('tanggal_reservasi_232112', today());
+                    break;
+                case 'weekly':
+                    $baseQuery->whereBetween('tanggal_reservasi_232112', [now()->startOfWeek(), now()->endOfWeek()]);
+                    break;
+                case 'monthly':
+                    $baseQuery->whereMonth('tanggal_reservasi_232112', now()->month)
+                              ->whereYear('tanggal_reservasi_232112', now()->year);
+                    break;
+                case 'yearly':
+                    $baseQuery->whereYear('tanggal_reservasi_232112', now()->year);
+                    break;
+            }
         }
 
-        // Get top lapangan by income
-        $topLapangan = Reservasi::whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+        // Determine the chart type and generate appropriate data
+        // If custom date range is provided, determine the best visualization based on date range
+        if ($startDate && $endDate) {
+            $start = \Carbon\Carbon::parse($startDate);
+            $end = \Carbon\Carbon::parse($endDate);
+            $diffInDays = $end->diffInDays($start);
+
+            if ($diffInDays <= 1) {
+                // Less than 2 days: show hourly data
+                for ($hour = 0; $hour < 24; $hour++) {
+                    $hourStart = $start->copy()->setHour($hour)->setMinute(0)->setSecond(0);
+                    $hourEnd = $hourStart->copy()->addHour();
+
+                    $income = Reservasi::whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+                        ->whereBetween('tanggal_reservasi_232112', [$hourStart, $hourEnd])
+                        ->sum('total_harga_232112');
+
+                    $reservasiCount = Reservasi::whereBetween('tanggal_reservasi_232112', [$hourStart, $hourEnd])
+                        ->count();
+
+                    $chartData[] = [
+                        'label' => $hourStart->format('H:00'),
+                        'income' => $income,
+                        'reservasi' => $reservasiCount
+                    ];
+                }
+            } elseif ($diffInDays <= 31) {
+                // Less than 32 days: show daily data
+                $current = $start->copy();
+                while ($current->lessThanOrEqualTo($end)) {
+                    $date = $current->copy();
+
+                    $income = Reservasi::whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+                        ->whereDate('tanggal_reservasi_232112', $date)
+                        ->sum('total_harga_232112');
+
+                    $reservasiCount = Reservasi::whereDate('tanggal_reservasi_232112', $date)
+                        ->count();
+
+                    $chartData[] = [
+                        'label' => $date->format('d'),
+                        'day' => $date->format('d M'),
+                        'income' => $income,
+                        'reservasi' => $reservasiCount
+                    ];
+
+                    $current->addDay();
+                }
+            } else {
+                // More than 31 days: show monthly data
+                $current = $start->copy()->startOfMonth();
+                $endMonth = $end->copy()->endOfMonth();
+
+                while ($current->lessThanOrEqualTo($endMonth)) {
+                    $month = $current->copy();
+
+                    $income = Reservasi::whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+                        ->whereYear('tanggal_reservasi_232112', $month->year)
+                        ->whereMonth('tanggal_reservasi_232112', $month->month)
+                        ->sum('total_harga_232112');
+
+                    $reservasiCount = Reservasi::whereYear('tanggal_reservasi_232112', $month->year)
+                        ->whereMonth('tanggal_reservasi_232112', $month->month)
+                        ->count();
+
+                    $chartData[] = [
+                        'label' => $month->format('M'),
+                        'month' => $month->format('F Y'),
+                        'income' => $income,
+                        'reservasi' => $reservasiCount
+                    ];
+
+                    $current->addMonth();
+                }
+            }
+        } else {
+            // Generate chart data based on the selected period type
+            switch ($periodType) {
+                case 'daily':
+                    // Get hourly income data for today
+                    for ($hour = 0; $hour < 24; $hour++) {
+                        $start = today()->setHour($hour)->setMinute(0)->setSecond(0);
+                        $end = $start->copy()->addHour();
+
+                        $income = Reservasi::whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+                            ->whereBetween('tanggal_reservasi_232112', [$start, $end])
+                            ->sum('total_harga_232112');
+
+                        $reservasiCount = Reservasi::whereBetween('tanggal_reservasi_232112', [$start, $end])
+                            ->count();
+
+                        $chartData[] = [
+                            'label' => $start->format('H:00'),
+                            'income' => $income,
+                            'reservasi' => $reservasiCount
+                        ];
+                    }
+                    break;
+
+                case 'weekly':
+                    // Get daily income data for the week
+                    $startOfWeek = now()->startOfWeek();
+                    for ($i = 0; $i < 7; $i++) {
+                        $date = $startOfWeek->copy()->addDays($i);
+
+                        $income = Reservasi::whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+                            ->whereDate('tanggal_reservasi_232112', $date)
+                            ->sum('total_harga_232112');
+
+                        $reservasiCount = Reservasi::whereDate('tanggal_reservasi_232112', $date)
+                            ->count();
+
+                        $chartData[] = [
+                            'label' => $date->format('D'),
+                            'day' => $date->format('d M'),
+                            'income' => $income,
+                            'reservasi' => $reservasiCount
+                        ];
+                    }
+                    break;
+
+                case 'yearly':
+                    // Get monthly income data for the year
+                    for ($i = 0; $i < 12; $i++) {
+                        $month = now()->startOfYear()->addMonths($i);
+
+                        $income = Reservasi::whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+                            ->whereYear('tanggal_reservasi_232112', $month->year)
+                            ->whereMonth('tanggal_reservasi_232112', $month->month)
+                            ->sum('total_harga_232112');
+
+                        $reservasiCount = Reservasi::whereYear('tanggal_reservasi_232112', $month->year)
+                            ->whereMonth('tanggal_reservasi_232112', $month->month)
+                            ->count();
+
+                        $chartData[] = [
+                            'label' => $month->format('M'),
+                            'month' => $month->format('F Y'),
+                            'income' => $income,
+                            'reservasi' => $reservasiCount
+                        ];
+                    }
+                    break;
+
+                default: // monthly
+                case 'monthly':
+                    // Get daily income data for the month
+                    $daysInMonth = now()->daysInMonth;
+                    for ($i = 1; $i <= $daysInMonth; $i++) {
+                        $date = now()->startOfMonth()->addDays($i - 1);
+
+                        $income = Reservasi::whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+                            ->whereDate('tanggal_reservasi_232112', $date)
+                            ->sum('total_harga_232112');
+
+                        $reservasiCount = Reservasi::whereDate('tanggal_reservasi_232112', $date)
+                            ->count();
+
+                        $chartData[] = [
+                            'label' => $date->format('d'),
+                            'day' => $date->format('d M'),
+                            'income' => $income,
+                            'reservasi' => $reservasiCount
+                        ];
+                    }
+                    break;
+            }
+        }
+
+        // Get top lapangan by income based on the same filters
+        $topLapanganQuery = Reservasi::whereIn('status_reservasi_232112', ['confirmed', 'completed'])
             ->join('lapangan_232112', 'reservasi_232112.lapangan_id_232112', '=', 'lapangan_232112.lapangan_id_232112')
             ->selectRaw('lapangan_232112.nama_lapangan_232112, SUM(reservasi_232112.total_harga_232112) as total_income')
             ->groupBy('lapangan_232112.lapangan_id_232112', 'lapangan_232112.nama_lapangan_232112')
             ->orderByDesc('total_income')
-            ->take(5)
-            ->get();
+            ->take(5);
+
+        // Apply same date filters to top lapangan query
+        if ($startDate && $endDate) {
+            $topLapanganQuery->whereBetween('reservasi.tanggal_reservasi_232112', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            $topLapanganQuery->whereDate('reservasi.tanggal_reservasi_232112', '>=', $startDate);
+        } elseif ($endDate) {
+            $topLapanganQuery->whereDate('reservasi.tanggal_reservasi_232112', '<=', $endDate);
+        } elseif ($periodType !== 'all') {
+            switch ($periodType) {
+                case 'daily':
+                    $topLapanganQuery->whereDate('reservasi.tanggal_reservasi_232112', today());
+                    break;
+                case 'weekly':
+                    $topLapanganQuery->whereBetween('reservasi.tanggal_reservasi_232112', [now()->startOfWeek(), now()->endOfWeek()]);
+                    break;
+                case 'monthly':
+                    $topLapanganQuery->whereMonth('reservasi.tanggal_reservasi_232112', now()->month)
+                                     ->whereYear('reservasi.tanggal_reservasi_232112', now()->year);
+                    break;
+                case 'yearly':
+                    $topLapanganQuery->whereYear('reservasi.tanggal_reservasi_232112', now()->year);
+                    break;
+            }
+        }
+
+        $topLapangan = $topLapanganQuery->get();
 
         return response()->json([
-            'monthlyData' => $chartData,
+            'periodType' => $periodType,
+            'chartData' => $chartData,
             'topLapangan' => $topLapangan
         ]);
     }
 
-    public function exportExcel()
+    public function exportExcel(Request $request)
     {
-        return Excel::download(new \App\Exports\ReservasiExport, 'Laporan_Reservasi_' . date('Y-m-d_H-i-s') . '.xlsx');
+        // Get date range and period type from request
+        $periodType = $request->input('period_type', 'all'); // all, daily, weekly, monthly, yearly
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        $reservasiQuery = Reservasi::with(['user', 'lapangan']);
+
+        // Apply date range filter if provided
+        // Use tanggal_reservasi_232112 (reservation date) instead of created_at_232112 for better accuracy
+        if ($startDate && $endDate) {
+            $reservasiQuery->whereBetween('tanggal_reservasi_232112', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            // If only start date is provided, use from start date to now
+            $reservasiQuery->whereDate('tanggal_reservasi_232112', '>=', $startDate);
+        } elseif ($endDate) {
+            // If only end date is provided, use from beginning to end date
+            $reservasiQuery->whereDate('tanggal_reservasi_232112', '<=', $endDate);
+        } elseif ($periodType !== 'all') {
+            // Apply period type filter only if no custom date range is specified
+            switch ($periodType) {
+                case 'daily':
+                    $reservasiQuery->whereDate('tanggal_reservasi_232112', today());
+                    break;
+                case 'weekly':
+                    $reservasiQuery->whereBetween('tanggal_reservasi_232112', [now()->startOfWeek(), now()->endOfWeek()]);
+                    break;
+                case 'monthly':
+                    $reservasiQuery->whereMonth('tanggal_reservasi_232112', now()->month)
+                                   ->whereYear('tanggal_reservasi_232112', now()->year);
+                    break;
+                case 'yearly':
+                    $reservasiQuery->whereYear('tanggal_reservasi_232112', now()->year);
+                    break;
+            }
+        }
+
+        $reservasi = $reservasiQuery->orderByDesc('created_at_232112')->get();
+
+        // Calculate total income for the period
+        $totalPendapatan = $reservasi->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+            ->sum('total_harga_232112');
+
+        // Create export with filtered data
+        $export = new class($reservasi, $totalPendapatan, $periodType, $startDate, $endDate) implements \Maatwebsite\Excel\Concerns\FromCollection, \Maatwebsite\Excel\Concerns\WithHeadings, \Maatwebsite\Excel\Concerns\WithTitle
+        {
+            private $reservasi;
+            private $totalPendapatan;
+            private $periodType;
+            private $startDate;
+            private $endDate;
+
+            public function __construct($reservasi, $totalPendapatan, $periodType, $startDate, $endDate)
+            {
+                $this->reservasi = $reservasi;
+                $this->totalPendapatan = $totalPendapatan;
+                $this->periodType = $periodType;
+                $this->startDate = $startDate;
+                $this->endDate = $endDate;
+            }
+
+            public function headings(): array
+            {
+                return [
+                    'ID Reservasi',
+                    'Nama User',
+                    'Email User',
+                    'Nama Lapangan',
+                    'Jenis Lapangan',
+                    'Tanggal Reservasi',
+                    'Waktu Mulai',
+                    'Waktu Selesai',
+                    'Total Harga',
+                    'Status Reservasi',
+                    'Catatan',
+                    'Tanggal Dibuat'
+                ];
+            }
+
+            public function title(): string
+            {
+                // Determine the appropriate period label based on provided parameters
+                if ($this->startDate && $this->endDate) {
+                    // Custom date range
+                    $periode = 'Periode ' . \Carbon\Carbon::parse($this->startDate)->format('d M Y') . ' - ' . \Carbon\Carbon::parse($this->endDate)->format('d M Y');
+                } elseif ($this->startDate) {
+                    // Only start date provided
+                    $periode = 'Sejak ' . \Carbon\Carbon::parse($this->startDate)->format('d M Y');
+                } elseif ($this->endDate) {
+                    // Only end date provided
+                    $periode = 'Sampai ' . \Carbon\Carbon::parse($this->endDate)->format('d M Y');
+                } else {
+                    // Period type filter applied
+                    switch ($this->periodType) {
+                        case 'daily':
+                            $periode = 'Harian (' . ($this->startDate ? \Carbon\Carbon::parse($this->startDate)->format('d M Y') : today()->format('d M Y')) . ')';
+                            break;
+                        case 'weekly':
+                            $startDateFormatted = $this->startDate ? \Carbon\Carbon::parse($this->startDate)->format('d M Y') : now()->startOfWeek()->format('d M Y');
+                            $endDateFormatted = $this->endDate ? \Carbon\Carbon::parse($this->endDate)->format('d M Y') : now()->endOfWeek()->format('d M Y');
+                            $periode = 'Mingguan (' . $startDateFormatted . ' - ' . $endDateFormatted . ')';
+                            break;
+                        case 'monthly':
+                            $startDateFormatted = $this->startDate ? \Carbon\Carbon::parse($this->startDate)->format('d M Y') : now()->startOfMonth()->format('d M Y');
+                            $endDateFormatted = $this->endDate ? \Carbon\Carbon::parse($this->endDate)->format('d M Y') : now()->endOfMonth()->format('d M Y');
+                            $periode = 'Bulanan (' . $startDateFormatted . ' - ' . $endDateFormatted . ')';
+                            break;
+                        case 'yearly':
+                            $tahun = $this->startDate ? \Carbon\Carbon::parse($this->startDate)->format('Y') : now()->format('Y');
+                            $periode = 'Tahunan (' . $tahun . ')';
+                            break;
+                        default:
+                            $periode = 'Semua Waktu';
+                            break;
+                    }
+                }
+
+                return 'Laporan Pendapatan (' . $periode . ')';
+            }
+
+            public function collection()
+            {
+                return collect($this->reservasi)->map(function ($item) {
+                    return [
+                        $item->reservasi_id_232112,
+                        $item->user->nama_232112,
+                        $item->user->email_232112,
+                        $item->lapangan->nama_lapangan_232112,
+                        $item->lapangan->jenis_lapangan_232112,
+                        $item->tanggal_reservasi_232112,
+                        $item->waktu_mulai_232112,
+                        $item->waktu_selesai_232112,
+                        $item->total_harga_232112,
+                        $item->status_reservasi_232112,
+                        $item->catatan_232112,
+                        $item->created_at_232112,
+                    ];
+                });
+            }
+        };
+
+        return Excel::download($export, 'Laporan_Reservasi_' . date('Y-m-d_H-i-s') . '.xlsx');
     }
 
-    public function exportPdf()
+    public function exportPdf(Request $request)
     {
-        // Get all reservations with related data for export
-        $reservasi = Reservasi::with(['user', 'lapangan'])
-            ->orderByDesc('created_at_232112')
-            ->get();
+        // Get date range and period type from request
+        $periodType = $request->input('period_type', 'all'); // all, daily, weekly, monthly, yearly
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        $reservasiQuery = Reservasi::with(['user', 'lapangan']);
+
+        // Apply date range filter if provided
+        // Use tanggal_reservasi_232112 (reservation date) instead of created_at_232112 for better accuracy
+        if ($startDate && $endDate) {
+            $reservasiQuery->whereBetween('tanggal_reservasi_232112', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            // If only start date is provided, use from start date to now
+            $reservasiQuery->whereDate('tanggal_reservasi_232112', '>=', $startDate);
+        } elseif ($endDate) {
+            // If only end date is provided, use from beginning to end date
+            $reservasiQuery->whereDate('tanggal_reservasi_232112', '<=', $endDate);
+        } elseif ($periodType !== 'all') {
+            // Apply period type filter only if no custom date range is specified
+            switch ($periodType) {
+                case 'daily':
+                    $reservasiQuery->whereDate('tanggal_reservasi_232112', today());
+                    break;
+                case 'weekly':
+                    $reservasiQuery->whereBetween('tanggal_reservasi_232112', [now()->startOfWeek(), now()->endOfWeek()]);
+                    break;
+                case 'monthly':
+                    $reservasiQuery->whereMonth('tanggal_reservasi_232112', now()->month)
+                                   ->whereYear('tanggal_reservasi_232112', now()->year);
+                    break;
+                case 'yearly':
+                    $reservasiQuery->whereYear('tanggal_reservasi_232112', now()->year);
+                    break;
+            }
+        }
+
+        $reservasi = $reservasiQuery->orderByDesc('created_at_232112')->get();
+
+        // Calculate total income for the period
+        $totalPendapatan = $reservasi->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+            ->sum('total_harga_232112');
+
+        // Determine the appropriate period label based on provided parameters
+        if ($startDate && $endDate) {
+            // Custom date range
+            $periodeInfo = 'Periode ' . \Carbon\Carbon::parse($startDate)->format('d M Y') . ' - ' . \Carbon\Carbon::parse($endDate)->format('d M Y');
+        } elseif ($startDate) {
+            // Only start date provided
+            $periodeInfo = 'Sejak ' . \Carbon\Carbon::parse($startDate)->format('d M Y');
+        } elseif ($endDate) {
+            // Only end date provided
+            $periodeInfo = 'Sampai ' . \Carbon\Carbon::parse($endDate)->format('d M Y');
+        } else {
+            // Period type filter applied
+            switch ($periodType) {
+                case 'daily':
+                    $periodeInfo = 'Harian (' . ($startDate ? \Carbon\Carbon::parse($startDate)->format('d M Y') : today()->format('d M Y')) . ')';
+                    break;
+                case 'weekly':
+                    $startDateFormatted = $startDate ? \Carbon\Carbon::parse($startDate)->format('d M Y') : now()->startOfWeek()->format('d M Y');
+                    $endDateFormatted = $endDate ? \Carbon\Carbon::parse($endDate)->format('d M Y') : now()->endOfWeek()->format('d M Y');
+                    $periodeInfo = 'Mingguan (' . $startDateFormatted . ' - ' . $endDateFormatted . ')';
+                    break;
+                case 'monthly':
+                    $startDateFormatted = $startDate ? \Carbon\Carbon::parse($startDate)->format('d M Y') : now()->startOfMonth()->format('d M Y');
+                    $endDateFormatted = $endDate ? \Carbon\Carbon::parse($endDate)->format('d M Y') : now()->endOfMonth()->format('d M Y');
+                    $periodeInfo = 'Bulanan (' . $startDateFormatted . ' - ' . $endDateFormatted . ')';
+                    break;
+                case 'yearly':
+                    $tahun = $startDate ? \Carbon\Carbon::parse($startDate)->format('Y') : now()->format('Y');
+                    $periodeInfo = 'Tahunan (' . $tahun . ')';
+                    break;
+                default:
+                    $periodeInfo = 'Semua Waktu';
+                    break;
+            }
+        }
 
         // Generate PDF using dompdf with landscape orientation
-        $pdf = \PDF::loadView('admin.report.pdf', ['reservasi' => $reservasi])->setPaper('a4', 'landscape');
+        $pdf = \PDF::loadView('admin.report.pdf', [
+            'reservasi' => $reservasi,
+            'totalPendapatan' => $totalPendapatan,
+            'periodeInfo' => $periodeInfo
+        ])->setPaper('a4', 'landscape');
         return $pdf->download('Laporan_Reservasi_' . date('Y-m-d_H-i-s') . '.pdf');
     }
 
