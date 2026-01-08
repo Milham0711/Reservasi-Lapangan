@@ -1,37 +1,9 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking Lapangan - SportVenue</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100">
-    <!-- Navbar -->
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center space-x-8">
-                    <span class="text-2xl font-bold text-blue-600">SportVenue</span>
-                    <div class="hidden md:flex space-x-4">
-                        <a href="{{ route('user.dashboard') }}" class="text-gray-600 hover:text-blue-600 px-3 py-2">Dashboard</a>
-                        <a href="{{ route('user.lapangan.index') }}" class="text-gray-600 hover:text-blue-600 px-3 py-2">Lapangan</a>
-                        <a href="{{ route('user.reservasi.index') }}" class="text-gray-600 hover:text-blue-600 px-3 py-2">Reservasi Saya</a>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <span class="text-gray-700">{{ Auth::user()->nama_232112 }}</span>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition">
-                            Logout
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </nav>
+@extends('layouts.user-sidebar')
 
+@section('title', 'Booking Lapangan')
+@section('header', 'Form Booking')
+
+@section('content')
     <!-- Main Content -->
     <main class="max-w-4xl mx-auto px-4 py-8">
         <div class="mb-6">
@@ -370,5 +342,4 @@
             updateWaktuSelesaiOptions();
         });
     </script>
-</body>
-</html>
+@endsection
