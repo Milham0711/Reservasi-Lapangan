@@ -793,6 +793,107 @@ class AdminController extends Controller
         return $pdf->download('Laporan_Reservasi_' . date('Y-m-d_H-i-s') . '.pdf');
     }
 
+    public function previewPdf(Request $request)
+    {
+        // Get date range and period type from request
+        $periodType = $request->input('period_type', 'all'); // all, daily, weekly, monthly, yearly
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        $reservasiQuery = Reservasi::with(['user', 'lapangan']);
+
+        // Apply date range filter if provided
+        // Use tanggal_reservasi_232112 (reservation date) instead of created_at_232112 for better accuracy
+        if ($startDate && $endDate) {
+            $reservasiQuery->whereBetween('tanggal_reservasi_232112', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            // If only start date is provided, use from start date to now
+            $reservasiQuery->whereDate('tanggal_reservasi_232112', '>=', $startDate);
+        } elseif ($endDate) {
+            // If only end date is provided, use from beginning to end date
+            $reservasiQuery->whereDate('tanggal_reservasi_232112', '<=', $endDate);
+        } elseif ($periodType !== 'all') {
+            // Apply period type filter only if no custom date range is specified
+            switch ($periodType) {
+                case 'daily':
+                    $reservasiQuery->whereDate('tanggal_reservasi_232112', today());
+                    break;
+                case 'weekly':
+                    $reservasiQuery->whereBetween('tanggal_reservasi_232112', [now()->startOfWeek(), now()->endOfWeek()]);
+                    break;
+                case 'monthly':
+                    $reservasiQuery->whereMonth('tanggal_reservasi_232112', now()->month)
+                                   ->whereYear('tanggal_reservasi_232112', now()->year);
+                    break;
+                case 'yearly':
+                    $reservasiQuery->whereYear('tanggal_reservasi_232112', now()->year);
+                    break;
+            }
+        }
+
+        $reservasi = $reservasiQuery->orderByDesc('created_at_232112')->get();
+
+        // Calculate total income for the period
+        $totalPendapatan = $reservasi->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+            ->sum('total_harga_232112');
+
+        // Determine the appropriate period label based on provided parameters
+        if ($startDate && $endDate) {
+            // Custom date range
+            $periodeInfo = 'Periode ' . \Carbon\Carbon::parse($startDate)->format('d M Y') . ' - ' . \Carbon\Carbon::parse($endDate)->format('d M Y');
+        } elseif ($startDate) {
+            // Only start date provided
+            $periodeInfo = 'Sejak ' . \Carbon\Carbon::parse($startDate)->format('d M Y');
+        } elseif ($endDate) {
+            // Only end date provided
+            $periodeInfo = 'Sampai ' . \Carbon\Carbon::parse($endDate)->format('d M Y');
+        } else {
+            // Period type filter applied
+            switch ($periodType) {
+                case 'daily':
+                    $periodeInfo = 'Harian (' . ($startDate ? \Carbon\Carbon::parse($startDate)->format('d M Y') : today()->format('d M Y')) . ')';
+                    break;
+                case 'weekly':
+                    $startDateFormatted = $startDate ? \Carbon\Carbon::parse($startDate)->format('d M Y') : now()->startOfWeek()->format('d M Y');
+                    $endDateFormatted = $endDate ? \Carbon\Carbon::parse($endDate)->format('d M Y') : now()->endOfWeek()->format('d M Y');
+                    $periodeInfo = 'Mingguan (' . $startDateFormatted . ' - ' . $endDateFormatted . ')';
+                    break;
+                case 'monthly':
+                    $startDateFormatted = $startDate ? \Carbon\Carbon::parse($startDate)->format('d M Y') : now()->startOfMonth()->format('d M Y');
+                    $endDateFormatted = $endDate ? \Carbon\Carbon::parse($endDate)->format('d M Y') : now()->endOfMonth()->format('d M Y');
+                    $periodeInfo = 'Bulanan (' . $startDateFormatted . ' - ' . $endDateFormatted . ')';
+                    break;
+                case 'yearly':
+                    $tahun = $startDate ? \Carbon\Carbon::parse($startDate)->format('Y') : now()->format('Y');
+                    $periodeInfo = 'Tahunan (' . $tahun . ')';
+                    break;
+                default:
+                    $periodeInfo = 'Semua Waktu';
+                    break;
+            }
+        }
+
+        // Check if download parameter is present
+        if ($request->has('download') && $request->input('download') == 'true') {
+            // Generate PDF using dompdf with landscape orientation
+            $pdf = \PDF::loadView('admin.report.pdf', [
+                'reservasi' => $reservasi,
+                'totalPendapatan' => $totalPendapatan,
+                'periodeInfo' => $periodeInfo
+            ])->setPaper('a4', 'landscape');
+            return $pdf->download('Laporan_Reservasi_' . date('Y-m-d_H-i-s') . '.pdf');
+        } else {
+            return view('admin.report.pdf_preview', [
+                'reservasi' => $reservasi,
+                'totalPendapatan' => $totalPendapatan,
+                'periodeInfo' => $periodeInfo,
+                'periodType' => $periodType,
+                'startDate' => $startDate,
+                'endDate' => $endDate
+            ]);
+        }
+    }
+
     // User Management Methods
     public function usersIndex()
     {
@@ -838,37 +939,6 @@ class AdminController extends Controller
         return view('admin.users.edit', compact('user'));
     }
 
-    public function usersUpdate(Request $request, $id)
-    {
-        $user = User::findOrFail($id);
-
-        $request->validate([
-            'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users_232112,email_232112,' . $id . ',user_id_232112',
-            'password' => 'nullable|min:8|confirmed',
-            'phone' => 'nullable|string|max:20',
-            'alamat' => 'nullable|string',
-            'role' => 'required|in:user,admin',
-        ]);
-
-        $data = [
-            'nama_232112' => $request->name,
-            'email_232112' => $request->email,
-            'telepon_232112' => $request->phone,
-            'alamat_232112' => $request->alamat,
-            'role_232112' => $request->role,
-        ];
-
-        // Only update password if provided
-        if ($request->filled('password')) {
-            $data['password_232112'] = bcrypt($request->password);
-        }
-
-        $user->update($data);
-
-        return redirect()->route('admin.users.index')
-            ->with('success', 'User berhasil diperbarui');
-    }
 
     public function usersDelete($id)
     {

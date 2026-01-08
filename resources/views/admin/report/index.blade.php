@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Laporan - SportVenue</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -369,7 +370,7 @@
             <!-- Export Buttons -->
             <div class="bg-white rounded-xl shadow-md p-6 mb-8">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4 sm:mb-0">Ekspor Laporan Umum</h2>
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 sm:mb-0">Ekspor Laporan</h2>
                     <div class="flex space-x-4">
                         <form id="exportExcelForm" method="POST" action="{{ route('admin.report.export.excel') }}" class="inline">
                             @csrf
@@ -384,12 +385,13 @@
                                 Ekspor ke Excel
                             </button>
                         </form>
-                        <form id="exportPdfForm" method="POST" action="{{ route('admin.report.export.pdf') }}" class="inline">
+
+                        <!-- Export to PDF Button (opens preview first) -->
+                        <form id="exportPdfForm" method="POST" action="{{ route('admin.report.preview.pdf') }}" class="inline">
                             @csrf
                             <input type="hidden" id="exportPeriodTypePdf" name="period_type" value="{{ request('period_type', 'all') }}">
                             <input type="hidden" id="exportStartDatePdf" name="start_date" value="{{ request('start_date') }}">
                             <input type="hidden" id="exportEndDatePdf" name="end_date" value="{{ request('end_date') }}">
-                            <input type="hidden" id="exportReportTypePdf" name="report_type" value="{{ request('report_type', 'general') }}">
                             <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg hover:shadow-xl flex items-center">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -924,30 +926,6 @@
         });
 
         updateReportData();
-
-        // If report type is specified in URL, load specific report
-        const urlParams = new URLSearchParams(window.location.search);
-        const reportType = urlParams.get('report_type');
-        if (reportType === 'daily' || reportType === 'monthly' || reportType === 'yearly') {
-            setTimeout(loadSpecificReport, 500);
-        }
-
-        // When report type changes, update the URL and show detailed section
-        document.getElementById('reportType').addEventListener('change', function() {
-            // Update URL with report type
-            const url = new URL(window.location);
-            url.searchParams.set('report_type', this.value);
-            window.history.pushState({}, '', url);
-
-            // If specific report type selected, show the detailed section and load data
-            if (this.value === 'daily' || this.value === 'monthly' || this.value === 'yearly') {
-                // Trigger loading of detailed report
-                setTimeout(loadSpecificReport, 300);
-            } else {
-                // For general report types, just update the general report section
-                updateReportData();
-            }
-        });
     </script>
 </body>
 </html>
