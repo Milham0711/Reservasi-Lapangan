@@ -44,6 +44,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/report/data', [AdminController::class, 'reportData'])->name('report.data');
     Route::post('/report/export/excel', [AdminController::class, 'exportExcel'])->name('report.export.excel');
     Route::post('/report/export/pdf', [AdminController::class, 'exportPdf'])->name('report.export.pdf');
+    Route::post('/report/preview/pdf', [AdminController::class, 'previewPdf'])->name('report.preview.pdf');
 
     // User Management
     Route::get('/users', [AdminController::class, 'usersIndex'])->name('users.index');

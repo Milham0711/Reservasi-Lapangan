@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Laporan - SportVenue</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -168,7 +169,7 @@
             <div class="bg-white rounded-xl shadow-md p-6 mb-8">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
                     <h2 class="text-xl font-bold text-gray-800 mb-4 sm:mb-0">Ekspor Laporan</h2>
-                    <div class="flex space-x-4">
+                    <div class="flex flex-wrap gap-4">
                         <form id="exportExcelForm" method="POST" action="{{ route('admin.report.export.excel') }}" class="inline">
                             @csrf
                             <input type="hidden" id="exportPeriodType" name="period_type" value="{{ request('period_type', 'all') }}">
@@ -181,12 +182,14 @@
                                 Ekspor ke Excel
                             </button>
                         </form>
-                        <form id="exportPdfForm" method="POST" action="{{ route('admin.report.export.pdf') }}" class="inline">
+
+                        <!-- Export to PDF Button (opens preview first) -->
+                        <form id="exportPdfForm" method="POST" action="{{ route('admin.report.preview.pdf') }}" class="inline">
                             @csrf
                             <input type="hidden" id="exportPeriodTypePdf" name="period_type" value="{{ request('period_type', 'all') }}">
                             <input type="hidden" id="exportStartDatePdf" name="start_date" value="{{ request('start_date') }}">
                             <input type="hidden" id="exportEndDatePdf" name="end_date" value="{{ request('end_date') }}">
-                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg hover:shadow-xl flex items-center">
+                            <button type="submit" id="exportPdfBtn" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg hover:shadow-xl flex items-center">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                 </svg>
@@ -347,6 +350,32 @@
 
         // Initialize charts on page load
         updateReportData();
+
+        // Update export form hidden fields when filter values change
+        function updateExportFormFields() {
+            // Get current filter values
+            const periodType = document.getElementById('periodType').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            // Update export form fields
+            document.getElementById('exportPeriodTypePdf').value = periodType;
+            document.getElementById('exportStartDatePdf').value = startDate;
+            document.getElementById('exportEndDatePdf').value = endDate;
+        }
+
+        // This function gets called when filter changes, so ensure it updates the export form too
+        // Update the existing updateReportData function to also update export form fields
+        const updateReportDataOriginal = updateReportData;
+        updateReportData = function() {
+            updateReportDataOriginal(); // Call original function
+            setTimeout(updateExportFormFields, 100); // Update export form after data updates
+        };
+
+        // Also update fields when they change
+        document.getElementById('periodType')?.addEventListener('change', updateExportFormFields);
+        document.getElementById('startDate')?.addEventListener('change', updateExportFormFields);
+        document.getElementById('endDate')?.addEventListener('change', updateExportFormFields);
     </script>
 </body>
 </html>
