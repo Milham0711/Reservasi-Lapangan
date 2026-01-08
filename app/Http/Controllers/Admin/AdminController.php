@@ -201,10 +201,20 @@ class AdminController extends Controller
 
     public function report(Request $request)
     {
-        // Get date range and period type from request
+        // Get date range, period type, and report type from request
+        $reportType = $request->input('report_type', 'general'); // general, daily, monthly, yearly
         $periodType = $request->input('period_type', 'all'); // all, daily, weekly, monthly, yearly
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
+
+        // For specific report types, adjust period type automatically
+        if ($reportType === 'daily' && $periodType === 'all') {
+            $periodType = 'daily';
+        } elseif ($reportType === 'monthly' && $periodType === 'all') {
+            $periodType = 'monthly';
+        } elseif ($reportType === 'yearly' && $periodType === 'all') {
+            $periodType = 'yearly';
+        }
 
         // Base query for reservations
         $baseQuery = Reservasi::query();
@@ -283,7 +293,8 @@ class AdminController extends Controller
             'currentPeriodType',
             'currentPeriodLabel',
             'startDate',
-            'endDate'
+            'endDate',
+            'reportType'
         ) + [
             'totalPendapatanCurrentPeriod' => $totalPendapatan, // Using the same total for consistency
             'totalReservasiCurrentPeriod' => $totalReservasi, // Using the same total for consistency
@@ -873,5 +884,600 @@ class AdminController extends Controller
 
         return redirect()->route('admin.users.index')
             ->with('success', 'User berhasil dihapus');
+    }
+
+    // New methods for daily, monthly, and yearly reports - redirect to main report page with appropriate parameters
+    public function reportsSummary()
+    {
+        return redirect()->route('admin.report.index', ['report_type' => 'general']);
+    }
+
+    public function reportsDaily()
+    {
+        return redirect()->route('admin.report.index', ['report_type' => 'daily']);
+    }
+
+    public function reportsMonthly()
+    {
+        return redirect()->route('admin.report.index', ['report_type' => 'monthly']);
+    }
+
+    public function reportsYearly()
+    {
+        return redirect()->route('admin.report.index', ['report_type' => 'yearly']);
+    }
+
+    public function reportsFetch(Request $request)
+    {
+        $type = $request->input('type');
+        $date = $request->input('date');
+        $month = $request->input('month');
+        $year = $request->input('year');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        try {
+            switch ($type) {
+                case 'daily':
+                    $result = $this->getDailyReport($date, $startDate, $endDate);
+                    break;
+                case 'monthly':
+                    $result = $this->getMonthlyReport($month, $startDate, $endDate);
+                    break;
+                case 'yearly':
+                    $result = $this->getYearlyReport($year, $startDate, $endDate);
+                    break;
+                default:
+                    return response()->json(['success' => false, 'message' => 'Invalid report type']);
+            }
+
+            return response()->json([
+                'success' => true,
+                'stats' => $result['stats'],
+                'chartData' => $result['chartData']
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching report data: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    private function getDailyReport($date = null, $startDate = null, $endDate = null)
+    {
+        // If both startDate and endDate are provided, use them as date range instead of single date
+        if ($startDate && $endDate) {
+            $reservasiQuery = Reservasi::whereBetween('tanggal_reservasi_232112', [$startDate, $endDate]);
+            $dateLabel = 'Rentang Tanggal';
+        } else {
+            $date = $date ?? today()->format('Y-m-d');
+            // Get reservations for the specific date
+            $reservasiQuery = Reservasi::whereDate('tanggal_reservasi_232112', $date);
+            $dateLabel = $date;
+        }
+
+        // Calculate stats
+        $totalReservasi = $reservasiQuery->count();
+        $totalIncome = $reservasiQuery->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+            ->sum('total_harga_232112');
+        $confirmedReservasi = $reservasiQuery
+            ->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+            ->count();
+
+        // Calculate average duration (in hours)
+        $avgDuration = 0;
+        if ($totalReservasi > 0) {
+            $reservasi = $reservasiQuery->get();
+            $totalDuration = 0;
+
+            foreach ($reservasi as $r) {
+                $start = \Carbon\Carbon::parse($r->waktu_mulai_232112);
+                $end = \Carbon\Carbon::parse($r->waktu_selesai_232112);
+                $totalDuration += $end->diffInHours($start);
+            }
+
+            $avgDuration = $totalReservasi > 0 ? round($totalDuration / $totalReservasi, 1) : 0;
+        }
+
+        // For hourly chart, we need to aggregate by day if using date range, or by hour if single day
+        $chartData = [];
+        if ($startDate && $endDate) {
+            // If date range is provided, aggregate by day
+            $start = \Carbon\Carbon::parse($startDate);
+            $end = \Carbon\Carbon::parse($endDate);
+
+            while ($start->lessThanOrEqualTo($end)) {
+                $currentDate = $start->copy();
+                $dailyIncome = Reservasi::whereDate('tanggal_reservasi_232112', $currentDate)
+                    ->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+                    ->sum('total_harga_232112');
+
+                $chartData[] = [
+                    'label' => $currentDate->format('d M'),
+                    'income' => $dailyIncome
+                ];
+
+                $start->addDay();
+            }
+        } else {
+            // Generate hourly chart data for single date
+            for ($hour = 0; $hour < 24; $hour++) {
+                $hourStart = \Carbon\Carbon::parse($date)->setHour($hour)->setMinute(0)->setSecond(0);
+                $hourEnd = $hourStart->copy()->addHour();
+
+                $hourlyIncome = Reservasi::whereDate('tanggal_reservasi_232112', $date)
+                    ->whereTime('waktu_mulai_232112', '>=', $hourStart->format('H:i:s'))
+                    ->whereTime('waktu_mulai_232112', '<', $hourEnd->format('H:i:s'))
+                    ->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+                    ->sum('total_harga_232112');
+
+                $chartData[] = [
+                    'label' => $hourStart->format('H:00'),
+                    'income' => $hourlyIncome
+                ];
+            }
+        }
+
+        return [
+            'stats' => [
+                'income' => $totalIncome,
+                'reservations' => $totalReservasi,
+                'confirmed' => $confirmedReservasi,
+                'avg_duration' => $avgDuration . ' jam'
+            ],
+            'chartData' => [
+                'labels' => array_column($chartData, 'label'),
+                'income_data' => array_column($chartData, 'income')
+            ]
+        ];
+    }
+
+    private function getMonthlyReport($month = null, $startDate = null, $endDate = null)
+    {
+        // If both startDate and endDate are provided, use them as date range instead of single month
+        if ($startDate && $endDate) {
+            $reservasiQuery = Reservasi::whereBetween('tanggal_reservasi_232112', [$startDate, $endDate]);
+
+            // Calculate stats for date range
+            $totalReservasi = $reservasiQuery->count();
+            $totalIncome = $reservasiQuery->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+                ->sum('total_harga_232112');
+
+            // Calculate days in range for daily avg
+            $start = \Carbon\Carbon::parse($startDate);
+            $end = \Carbon\Carbon::parse($endDate);
+            $daysInRange = $start->diffInDays($end) + 1;
+            $dailyAvg = $daysInRange > 0 ? $totalReservasi / $daysInRange : 0;
+
+            // Find peak day in range
+            $dailyStats = [];
+            $peakDayIncome = 0;
+            $peakDay = '';
+
+            $current = $start->copy();
+            while ($current->lessThanOrEqualTo($end)) {
+                $currentDate = $current->copy();
+                $dayIncome = Reservasi::whereDate('tanggal_reservasi_232112', $currentDate)
+                    ->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+                    ->sum('total_harga_232112');
+
+                $dailyStats[] = [
+                    'day' => $currentDate->format('d'),
+                    'income' => $dayIncome
+                ];
+
+                if ($dayIncome > $peakDayIncome) {
+                    $peakDayIncome = $dayIncome;
+                    $peakDay = $currentDate->format('d F Y');
+                }
+
+                $current->addDay();
+            }
+
+            return [
+                'stats' => [
+                    'income' => $totalIncome,
+                    'reservations' => $totalReservasi,
+                    'daily_avg' => round($dailyAvg, 1),
+                    'peak_day' => $peakDay
+                ],
+                'chartData' => [
+                    'labels' => array_map(function($day) { return $day . ' '; }, range(1, min(31, count($dailyStats)))), // Just show day numbers
+                    'income_data' => array_column($dailyStats, 'income')
+                ]
+            ];
+        } else {
+            // Original monthly report logic
+            $date = $month ? \Carbon\Carbon::parse($month . '-01') : now();
+            $year = $date->year;
+            $monthNum = $date->month;
+            $daysInMonth = $date->daysInMonth;
+
+            // Get reservations for the specific month
+            $reservasiQuery = Reservasi::whereYear('tanggal_reservasi_232112', $year)
+                ->whereMonth('tanggal_reservasi_232112', $monthNum);
+
+            // Calculate stats
+            $totalReservasi = $reservasiQuery->count();
+            $totalIncome = $reservasiQuery->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+                ->sum('total_harga_232112');
+            $dailyAvg = $totalReservasi / $daysInMonth;
+
+            // Find peak day
+            $dailyStats = [];
+            $peakDayIncome = 0;
+            $peakDay = '';
+
+            for ($day = 1; $day <= $daysInMonth; $day++) {
+                $currentDate = \Carbon\Carbon::create($year, $monthNum, $day);
+                $dayIncome = Reservasi::whereDate('tanggal_reservasi_232112', $currentDate)
+                    ->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+                    ->sum('total_harga_232112');
+
+                $dailyStats[] = [
+                    'day' => $currentDate->format('d'),
+                    'income' => $dayIncome
+                ];
+
+                if ($dayIncome > $peakDayIncome) {
+                    $peakDayIncome = $dayIncome;
+                    $peakDay = $currentDate->format('d F');
+                }
+            }
+
+            return [
+                'stats' => [
+                    'income' => $totalIncome,
+                    'reservations' => $totalReservasi,
+                    'daily_avg' => round($dailyAvg, 1),
+                    'peak_day' => $peakDay
+                ],
+                'chartData' => [
+                    'labels' => array_map(function($day) { return $day . ' '; }, range(1, $daysInMonth)),
+                    'income_data' => array_column($dailyStats, 'income')
+                ]
+            ];
+        }
+    }
+
+    private function getYearlyReport($year = null, $startDate = null, $endDate = null)
+    {
+        // If both startDate and endDate are provided, use them as date range instead of single year
+        if ($startDate && $endDate) {
+            $reservasiQuery = Reservasi::whereBetween('tanggal_reservasi_232112', [$startDate, $endDate]);
+
+            // Calculate stats for date range
+            $totalReservasi = $reservasiQuery->count();
+            $totalIncome = $reservasiQuery->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+                ->sum('total_harga_232112');
+
+            // Calculate months in range for monthly avg
+            $start = \Carbon\Carbon::parse($startDate);
+            $end = \Carbon\Carbon::parse($endDate);
+            $monthsDiff = $start->diffInMonths($end) + 1; // Adding 1 to include both start and end months
+            $monthlyAvg = $monthsDiff > 0 ? $totalReservasi / $monthsDiff : 0;
+
+            // Find best month in range
+            $monthlyStats = [];
+            $bestMonthIncome = 0;
+            $bestMonth = '';
+
+            $current = $start->copy()->startOfMonth();
+            $endMonth = $end->copy()->endOfMonth();
+
+            while ($current->lessThanOrEqualTo($endMonth)) {
+                $currentMonth = $current->copy();
+                $monthIncome = Reservasi::whereYear('tanggal_reservasi_232112', $currentMonth->year)
+                    ->whereMonth('tanggal_reservasi_232112', $currentMonth->month)
+                    ->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+                    ->sum('total_harga_232112');
+
+                $monthName = $currentMonth->format('M');
+
+                $monthlyStats[] = [
+                    'month' => $monthName,
+                    'income' => $monthIncome
+                ];
+
+                if ($monthIncome > $bestMonthIncome) {
+                    $bestMonthIncome = $monthIncome;
+                    $bestMonth = $currentMonth->format('F Y');
+                }
+
+                $current->addMonth();
+            }
+
+            return [
+                'stats' => [
+                    'income' => $totalIncome,
+                    'reservations' => $totalReservasi,
+                    'monthly_avg' => round($monthlyAvg, 1),
+                    'best_month' => $bestMonth
+                ],
+                'chartData' => [
+                    'labels' => array_column($monthlyStats, 'month'),
+                    'income_data' => array_column($monthlyStats, 'income')
+                ]
+            ];
+        } else {
+            // Original yearly report logic
+            $year = $year ?? now()->year;
+
+            // Get reservations for the specific year
+            $reservasiQuery = Reservasi::whereYear('tanggal_reservasi_232112', $year);
+
+            // Calculate stats
+            $totalReservasi = $reservasiQuery->count();
+            $totalIncome = $reservasiQuery->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+                ->sum('total_harga_232112');
+            $monthlyAvg = $totalReservasi / 12;
+
+            // Find best month
+            $monthlyStats = [];
+            $bestMonthIncome = 0;
+            $bestMonth = '';
+
+            for ($month = 1; $month <= 12; $month++) {
+                $monthIncome = Reservasi::whereYear('tanggal_reservasi_232112', $year)
+                    ->whereMonth('tanggal_reservasi_232112', $month)
+                    ->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+                    ->sum('total_harga_232112');
+
+                $monthName = \Carbon\Carbon::create($year, $month, 1)->format('M');
+
+                $monthlyStats[] = [
+                    'month' => $monthName,
+                    'income' => $monthIncome
+                ];
+
+                if ($monthIncome > $bestMonthIncome) {
+                    $bestMonthIncome = $monthIncome;
+                    $bestMonth = \Carbon\Carbon::create($year, $month, 1)->format('F');
+                }
+            }
+
+            return [
+                'stats' => [
+                    'income' => $totalIncome,
+                    'reservations' => $totalReservasi,
+                    'monthly_avg' => round($monthlyAvg, 1),
+                    'best_month' => $bestMonth
+                ],
+                'chartData' => [
+                    'labels' => array_column($monthlyStats, 'month'),
+                    'income_data' => array_column($monthlyStats, 'income')
+                ]
+            ];
+        }
+    }
+
+    public function reportsExport(Request $request, $type)
+    {
+        $date = $request->input('date');
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+        // Get reservations based on report type
+        $reservasiQuery = Reservasi::with(['user', 'lapangan']);
+
+        switch ($type) {
+            case 'daily':
+                $reservasiQuery->whereDate('tanggal_reservasi_232112', $date);
+                $title = 'Laporan Harian';
+                $periode = \Carbon\Carbon::parse($date)->format('d F Y');
+                break;
+            case 'monthly':
+                $dateObj = \Carbon\Carbon::parse($month . '-01');
+                $reservasiQuery->whereYear('tanggal_reservasi_232112', $dateObj->year)
+                               ->whereMonth('tanggal_reservasi_232112', $dateObj->month);
+                $title = 'Laporan Bulanan';
+                $periode = $dateObj->format('F Y');
+                break;
+            case 'yearly':
+                $reservasiQuery->whereYear('tanggal_reservasi_232112', $year);
+                $title = 'Laporan Tahunan';
+                $periode = $year;
+                break;
+            default:
+                return redirect()->back()->with('error', 'Invalid report type');
+        }
+
+        $reservasi = $reservasiQuery->orderByDesc('created_at_232112')->get();
+
+        // Calculate total income for the period
+        $totalPendapatan = $reservasi->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+            ->sum('total_harga_232112');
+
+        // Create export
+        $export = new class($reservasi, $totalPendapatan, $title, $periode) implements \Maatwebsite\Excel\Concerns\FromCollection, \Maatwebsite\Excel\Concerns\WithHeadings, \Maatwebsite\Excel\Concerns\WithTitle
+        {
+            private $reservasi;
+            private $totalPendapatan;
+            private $title;
+            private $periode;
+
+            public function __construct($reservasi, $totalPendapatan, $title, $periode)
+            {
+                $this->reservasi = $reservasi;
+                $this->totalPendapatan = $totalPendapatan;
+                $this->title = $title . ' (' . $periode . ')';
+                $this->periode = $periode;
+            }
+
+            public function headings(): array
+            {
+                return [
+                    'ID Reservasi',
+                    'Nama User',
+                    'Email User',
+                    'Nama Lapangan',
+                    'Jenis Lapangan',
+                    'Tanggal Reservasi',
+                    'Waktu Mulai',
+                    'Waktu Selesai',
+                    'Total Harga',
+                    'Status Reservasi',
+                    'Catatan',
+                    'Tanggal Dibuat'
+                ];
+            }
+
+            public function title(): string
+            {
+                return $this->title;
+            }
+
+            public function collection()
+            {
+                return collect($this->reservasi)->map(function ($item) {
+                    return [
+                        $item->reservasi_id_232112,
+                        $item->user->nama_232112,
+                        $item->user->email_232112,
+                        $item->lapangan->nama_lapangan_232112,
+                        $item->lapangan->jenis_lapangan_232112,
+                        $item->tanggal_reservasi_232112,
+                        $item->waktu_mulai_232112,
+                        $item->waktu_selesai_232112,
+                        $item->total_harga_232112,
+                        $item->status_reservasi_232112,
+                        $item->catatan_232112,
+                        $item->created_at_232112,
+                    ];
+                });
+            }
+        };
+
+        return Excel::download($export, $title . '_' . $periode . '_' . date('Y-m-d_H-i-s') . '.xlsx');
+    }
+
+    public function reportsExportPdf(Request $request, $type)
+    {
+        $date = $request->input('date');
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+        // Get reservations based on report type
+        $reservasiQuery = Reservasi::with(['user', 'lapangan']);
+
+        switch ($type) {
+            case 'daily':
+                $reservasiQuery->whereDate('tanggal_reservasi_232112', $date);
+                $title = 'Laporan Harian';
+                $periode = \Carbon\Carbon::parse($date)->format('d F Y');
+                break;
+            case 'monthly':
+                $dateObj = \Carbon\Carbon::parse($month . '-01');
+                $reservasiQuery->whereYear('tanggal_reservasi_232112', $dateObj->year)
+                               ->whereMonth('tanggal_reservasi_232112', $dateObj->month);
+                $title = 'Laporan Bulanan';
+                $periode = $dateObj->format('F Y');
+                break;
+            case 'yearly':
+                $reservasiQuery->whereYear('tanggal_reservasi_232112', $year);
+                $title = 'Laporan Tahunan';
+                $periode = $year;
+                break;
+            default:
+                return redirect()->back()->with('error', 'Invalid report type');
+        }
+
+        $reservasi = $reservasiQuery->orderByDesc('created_at_232112')->get();
+
+        // Calculate total income for the period
+        $totalPendapatan = $reservasi->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+            ->sum('total_harga_232112');
+
+        // Generate PDF
+        $pdf = \PDF::loadView('admin.report.pdf', [
+            'reservasi' => $reservasi,
+            'totalPendapatan' => $totalPendapatan,
+            'periodeInfo' => $title . ' (' . $periode . ')'
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download($title . '_' . $periode . '_' . date('Y-m-d_H-i-s') . '.pdf');
+    }
+
+    // New method to get detailed report data for table display
+    public function detailedReportData(Request $request)
+    {
+        $reportType = $request->input('type');
+        $date = $request->input('date');
+        $month = $request->input('month');
+        $year = $request->input('year');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        // Base query for reservations with necessary relationships
+        $reservasiQuery = Reservasi::with(['user', 'lapangan']);
+
+        // Apply filters based on report type and available date filters
+        if ($startDate && $endDate) {
+            // If both start and end date are provided, use date range regardless of report type
+            $reservasiQuery->whereBetween('tanggal_reservasi_232112', [$startDate, $endDate]);
+        } else {
+            // Apply filters based on report type
+            switch ($reportType) {
+                case 'daily':
+                    if ($date) {
+                        $reservasiQuery->whereDate('tanggal_reservasi_232112', $date);
+                    } else {
+                        $reservasiQuery->whereDate('tanggal_reservasi_232112', today());
+                    }
+                    break;
+                case 'monthly':
+                    if ($month) {
+                        $dateObj = \Carbon\Carbon::parse($month . '-01');
+                        $reservasiQuery->whereYear('tanggal_reservasi_232112', $dateObj->year)
+                                       ->whereMonth('tanggal_reservasi_232112', $dateObj->month);
+                    } else {
+                        $reservasiQuery->whereYear('tanggal_reservasi_232112', now()->year)
+                                       ->whereMonth('tanggal_reservasi_232112', now()->month);
+                    }
+                    break;
+                case 'yearly':
+                    if ($year) {
+                        $reservasiQuery->whereYear('tanggal_reservasi_232112', $year);
+                    } else {
+                        $reservasiQuery->whereYear('tanggal_reservasi_232112', now()->year);
+                    }
+                    break;
+                default:
+                    return response()->json(['success' => false, 'message' => 'Invalid report type']);
+            }
+        }
+
+        $reservasi = $reservasiQuery->orderBy('tanggal_reservasi_232112', 'desc')
+                                    ->orderBy('waktu_mulai_232112', 'asc')
+                                    ->get();
+
+        // Format the data for the table
+        $tableData = $reservasi->map(function ($item) {
+            return [
+                'id' => $item->reservasi_id_232112,
+                'user_name' => $item->user->nama_232112,
+                'user_email' => $item->user->email_232112,
+                'lapangan_name' => $item->lapangan->nama_lapangan_232112,
+                'lapangan_jenis' => $item->lapangan->jenis_lapangan_232112,
+                'tanggal_reservasi' => \Carbon\Carbon::parse($item->tanggal_reservasi_232112)->format('d M Y'),
+                'waktu_mulai' => $item->waktu_mulai_232112,
+                'waktu_selesai' => $item->waktu_selesai_232112,
+                'total_harga' => $item->total_harga_232112,
+                'status' => $item->status_reservasi_232112,
+                'formatted_harga' => 'Rp ' . number_format($item->total_harga_232112, 0, ',', '.')
+            ];
+        });
+
+        // Calculate total income for the period
+        $totalPendapatan = $reservasi->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+            ->sum('total_harga_232112');
+
+        return response()->json([
+            'success' => true,
+            'data' => $tableData,
+            'total_pendapatan' => $totalPendapatan,
+            'formatted_total_pendapatan' => 'Rp ' . number_format($totalPendapatan, 0, ',', '.')
+        ]);
     }
 }
