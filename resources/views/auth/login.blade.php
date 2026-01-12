@@ -37,7 +37,7 @@
             <form method="POST" action="{{ route('login') }}">
                 @csrf
                 
-                <!-- Email or Phone -->
+                 <!-- Email or Phone -->
                 <div class="mb-6">
                     <label for="login" class="block text-sm font-medium text-gray-700 mb-2">Email atau Nomor Telepon</label>
                     <input type="text" name="login" id="login" required
