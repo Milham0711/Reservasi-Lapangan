@@ -5,7 +5,6 @@
 
 @section('content')
     <!-- Main Content -->
-    <main class="max-w-4xl mx-auto px-4 py-8">
         <div class="mb-6">
             <a href="{{ route('user.lapangan.index') }}" class="text-blue-600 hover:text-blue-700 flex items-center">
                 <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -28,7 +27,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                                 </svg>
                             </div>
-                        @endif>
+                        @endif
                     </div>
                     <div class="p-6">
                         <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full mb-3 capitalize">

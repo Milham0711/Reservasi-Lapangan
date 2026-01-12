@@ -57,7 +57,7 @@
             <div class="bg-white rounded-xl shadow-md p-8">
                 <div class="header text-center mb-6">
                     <div class="header-logo flex justify-center mb-4">
-                        <img src="{{ asset('images/logo/logo.png') }}" alt="SportVenue Logo" class="h-10">
+                        <img src="{{ asset('images/logo/logo.png') }}" alt="SportVenue Logo" class="h-32">
                     </div>
                     <h1 class="text-2xl font-bold text-gray-800">Laporan Reservasi Lapangan</h1>
                     <p class="text-gray-600 mt-2">Periode: {{ $periodeInfo ?? 'Semua Waktu' }}</p>

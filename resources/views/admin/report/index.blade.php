@@ -44,48 +44,13 @@
                     <span>Kelola User</span>
                 </a>
                 <div class="border-t border-gray-200 my-2 pt-2">
-                    <!-- Laporan Parent Menu -->
-                    <div x-data="{ open: true }" class="mb-1">
-                        <a href="#" @click="open = !open" class="flex items-center justify-between space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
-                            <div class="flex items-center space-x-3">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                </svg>
-                                <span class="font-semibold">Laporan</span>
-                            </div>
-                            <svg :class="{'rotate-180': open}" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </a>
-
-                        <!-- Submenu Laporan -->
-                        <div x-show="open" x-collapse class="pl-10 mt-1 space-y-1">
-                            <a href="{{ route('admin.report.index') }}" class="flex items-center space-x-3 px-4 py-2 {{ request('report_type') == 'general' || !request('report_type') ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-600 hover:bg-gray-50' }} rounded-lg">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                </svg>
-                                <span>Semua Laporan</span>
-                            </a>
-                            <a href="{{ route('admin.report.index') }}?report_type=daily" class="flex items-center space-x-3 px-4 py-2 {{ request('report_type') == 'daily' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-600 hover:bg-gray-50' }} rounded-lg">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                                <span>Laporan Harian</span>
-                            </a>
-                            <a href="{{ route('admin.report.index') }}?report_type=monthly" class="flex items-center space-x-3 px-4 py-2 {{ request('report_type') == 'monthly' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-600 hover:bg-gray-50' }} rounded-lg">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                                <span>Laporan Bulanan</span>
-                            </a>
-                            <a href="{{ route('admin.report.index') }}?report_type=yearly" class="flex items-center space-x-3 px-4 py-2 {{ request('report_type') == 'yearly' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-600 hover:bg-gray-50' }} rounded-lg">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                                <span>Laporan Tahunan</span>
-                            </a>
-                        </div>
-                    </div>
+                    <!-- Laporan Menu - No longer a dropdown -->
+                    <a href="{{ route('admin.report.index') }}" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        <span class="font-semibold">Laporan</span>
+                    </a>
                 </div>
             </nav>
             <div class="flex items-center justify-center border-t border-gray-200 mt-auto py-4">
@@ -111,23 +76,13 @@
                     <h2 class="text-xl font-bold text-gray-800">Filter Laporan</h2>
                     <div class="flex flex-wrap gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Laporan</label>
-                            <select id="reportType" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="general" {{ request('report_type') == 'general' || !request('report_type') ? 'selected' : '' }}>Semua Laporan</option>
-                                <option value="daily" {{ request('report_type') == 'daily' ? 'selected' : '' }}>Laporan Harian</option>
-                                <option value="weekly" {{ request('report_type') == 'weekly' ? 'selected' : '' }}>Laporan Mingguan</option>
-                                <option value="monthly" {{ request('report_type') == 'monthly' ? 'selected' : '' }}>Laporan Bulanan</option>
-                                <option value="yearly" {{ request('report_type') == 'yearly' ? 'selected' : '' }}>Laporan Tahunan</option>
-                            </select>
-                        </div>
-                        <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Periode</label>
                             <select id="periodType" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="all" {{ request('period_type') == 'all' ? 'selected' : '' }}>Semua Waktu</option>
-                                <option value="daily" {{ request('period_type') == 'daily' ? 'selected' : '' }}>Harian</option>
-                                <option value="weekly" {{ request('period_type') == 'weekly' ? 'selected' : '' }}>Mingguan</option>
-                                <option value="monthly" {{ request('period_type') == 'monthly' ? 'selected' : '' }}>Bulanan</option>
-                                <option value="yearly" {{ request('period_type') == 'yearly' ? 'selected' : '' }}>Tahunan</option>
+                                <option value="daily" {{ request('period_type') == 'daily' ? 'selected' : '' }}>Hari Ini</option>
+                                <option value="weekly" {{ request('period_type') == 'weekly' ? 'selected' : '' }}>Minggu Ini</option>
+                                <option value="monthly" {{ request('period_type') == 'monthly' ? 'selected' : '' }}>Bulan Ini</option>
+                                <option value="yearly" {{ request('period_type') == 'yearly' ? 'selected' : '' }}>Tahun Ini</option>
                             </select>
                         </div>
                         <div>
@@ -326,37 +281,8 @@
                     </div>
                 </div>
 
-                <!-- Detailed Export Buttons -->
-                <div class="mt-6 flex justify-end space-x-4">
-                    <form id="detailedExportExcelForm" method="POST" action="{{ route('admin.reports.export', ['type' => request('report_type', 'daily')]) }}" class="inline">
-                        @csrf
-                        <input type="hidden" name="report_type" value="{{ request('report_type', 'daily') }}">
-                        <input type="hidden" id="detailedDate" name="date" value="{{ \Carbon\Carbon::today()->format('Y-m-d') }}">
-                        <input type="hidden" id="detailedMonth" name="month" value="{{ \Carbon\Carbon::now()->format('Y-m') }}">
-                        <input type="hidden" id="detailedYear" name="year" value="{{ \Carbon\Carbon::now()->format('Y') }}">
-                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg flex items-center">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            Ekspor Excel
-                        </button>
-                    </form>
-                    <form id="detailedExportPdfForm" method="POST" action="{{ route('admin.reports.export.pdf', ['type' => request('report_type', 'daily')]) }}" class="inline">
-                        @csrf
-                        <input type="hidden" name="report_type" value="{{ request('report_type', 'daily') }}">
-                        <input type="hidden" id="detailedDatePdf" name="date" value="{{ \Carbon\Carbon::today()->format('Y-m-d') }}">
-                        <input type="hidden" id="detailedMonthPdf" name="month" value="{{ \Carbon\Carbon::now()->format('Y-m') }}">
-                        <input type="hidden" id="detailedYearPdf" name="year" value="{{ \Carbon\Carbon::now()->format('Y') }}">
-                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg flex items-center">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            Ekspor PDF
-                        </button>
-                    </form>
-                </div>
             </div>
-            @endif
+@endif
 
             <!-- Export Buttons -->
             <div class="bg-white rounded-xl shadow-md p-6 mb-8">
@@ -368,7 +294,6 @@
                             <input type="hidden" id="exportPeriodType" name="period_type" value="{{ request('period_type', 'all') }}">
                             <input type="hidden" id="exportStartDate" name="start_date" value="{{ request('start_date') }}">
                             <input type="hidden" id="exportEndDate" name="end_date" value="{{ request('end_date') }}">
-                            <input type="hidden" id="exportReportType" name="report_type" value="{{ request('report_type', 'general') }}">
                             <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg hover:shadow-xl flex items-center">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -426,17 +351,14 @@
             const periodType = document.getElementById('periodType').value;
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
-            const reportType = document.getElementById('reportType').value;
 
             // Update export form hidden fields
             document.getElementById('exportPeriodType').value = periodType;
             document.getElementById('exportStartDate').value = startDate;
             document.getElementById('exportEndDate').value = endDate;
-            document.getElementById('exportReportType').value = reportType;
             document.getElementById('exportPeriodTypePdf').value = periodType;
             document.getElementById('exportStartDatePdf').value = startDate;
             document.getElementById('exportEndDatePdf').value = endDate;
-            document.getElementById('exportReportTypePdf').value = reportType;
 
             // Build query parameters
             const params = new URLSearchParams();
@@ -549,12 +471,9 @@
                         loadingNotification.remove();
                     }
 
-                    // If the report type is daily, monthly, or yearly, also update the detailed report section
-                    if (reportType === 'daily' || reportType === 'monthly' || reportType === 'yearly') {
-                        // For daily, monthly, or yearly reports, load the detailed report data
-                        // This will also update the detailed report table
-                        setTimeout(loadSpecificReport, 100); // Small delay to ensure state is consistent
-                    }
+                    // Load the detailed report data based on the current filters
+                    // This will also update the detailed report table
+                    setTimeout(loadSpecificReport, 100); // Small delay to ensure state is consistent
 
                 })
                 .catch(error => {
@@ -571,76 +490,59 @@
 
         // Function to load detailed report data
         function loadSpecificReport() {
-            const reportType = document.getElementById('reportType').value;
-
             // Get the dates from the filter fields
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
+            const periodType = document.getElementById('periodType').value; // Use periodType instead of reportType
 
             let date = null;
             let month = null;
             let year = null;
 
-            // Determine parameters based on report type and available filters
-            if (reportType === 'daily') {
+            // Determine parameters based on period type and available filters
+            if (periodType === 'daily') {
                 // For daily report, use the start date from filter or today if none specified
                 date = startDate || new Date().toISOString().split('T')[0];
-
-                // Also update the period type filter to 'daily' to ensure correct data retrieval
-                document.getElementById('periodType').value = 'daily';
-            } else if (reportType === 'monthly') {
+            } else if (periodType === 'weekly') {
+                // For weekly report, treat it similar to daily since we don't have a special weekly handler
+                // The date range will be handled by startDate/endDate parameters
+                if (!startDate) {
+                    // Use today's date if no start date specified
+                    date = new Date().toISOString().split('T')[0];
+                }
+            } else if (periodType === 'monthly') {
                 // For monthly report, extract year-month from start date filter or use current month
                 if (startDate) {
                     const start = new Date(startDate);
                     month = start.getFullYear() + '-' + String(start.getMonth() + 1).padStart(2, '0');
-
-                    // Also update the period type filter to 'monthly'
-                    document.getElementById('periodType').value = 'monthly';
                 } else {
                     month = new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0');
                 }
-            } else if (reportType === 'yearly') {
+            } else if (periodType === 'yearly') {
                 // For yearly report, extract year from start date filter or use current year
                 if (startDate) {
                     const start = new Date(startDate);
                     year = start.getFullYear().toString();
-
-                    // Also update the period type filter to 'yearly'
-                    document.getElementById('periodType').value = 'yearly';
                 } else {
                     year = new Date().getFullYear().toString();
                 }
             }
 
-            // Update hidden fields for export
-            if(date) {
-                document.getElementById('detailedDate').value = date;
-                document.getElementById('detailedDatePdf').value = date;
-            }
-            if(month) {
-                document.getElementById('detailedMonth').value = month;
-                document.getElementById('detailedMonthPdf').value = month;
-            }
-            if(year) {
-                document.getElementById('detailedYear').value = year;
-                document.getElementById('detailedYearPdf').value = year;
-            }
-
             // Prepare parameters for fetching report data
             let statsParams = new URLSearchParams();
-            statsParams.append('type', reportType);
+            statsParams.append('type', periodType); // Use periodType instead of reportType
 
-            // If we have a date range, use it for fetching stats (but still use report type for context)
+            // If we have a date range, use it for fetching stats
             if (startDate && endDate) {
                 statsParams.append('start_date', startDate);
                 statsParams.append('end_date', endDate);
             } else {
-                // Otherwise use the specific parameters
-                if (reportType === 'daily' && date) {
+                // Otherwise use the specific parameters based on period type
+                if (periodType === 'daily' && date) {
                     statsParams.append('date', date);
-                } else if (reportType === 'monthly' && month) {
+                } else if (periodType === 'monthly' && month) {
                     statsParams.append('month', month);
-                } else if (reportType === 'yearly' && year) {
+                } else if (periodType === 'yearly' && year) {
                     statsParams.append('year', year);
                 }
             }
@@ -663,7 +565,8 @@
 
                         const detailedCtx = document.getElementById('detailedChart').getContext('2d');
 
-                        if (reportType === 'daily') {
+                        // Use periodType for determining chart type
+                        if (periodType === 'daily') {
                             // Daily: show chart (hourly for single day, daily for date range)
                             detailedChart = new Chart(detailedCtx, {
                                 type: 'line',
@@ -693,7 +596,7 @@
                                     }
                                 }
                             });
-                        } else if (reportType === 'monthly') {
+                        } else if (periodType === 'monthly') {
                             // Monthly: show daily chart
                             detailedChart = new Chart(detailedCtx, {
                                 type: 'bar',
@@ -722,7 +625,7 @@
                                     }
                                 }
                             });
-                        } else if (reportType === 'yearly') {
+                        } else if (periodType === 'yearly') {
                             // Yearly: show monthly chart
                             detailedChart = new Chart(detailedCtx, {
                                 type: 'line',
@@ -756,14 +659,14 @@
 
                         // Load detailed report table data
                         // Pass null values so loadDetailedReportTable uses the date range from filters when available
-                        loadDetailedReportTable(reportType, null, null, null);
+                        loadDetailedReportTable(periodType, null, null, null); // Use periodType instead of reportType
                     }
                 })
                 .catch(error => console.error('Error fetching detailed report data:', error));
         }
 
         // Function to load detailed report table
-        function loadDetailedReportTable(reportType, date, month, year) {
+        function loadDetailedReportTable(periodType, date, month, year) {
             // Show loading state
             document.getElementById('detailedReportTable').innerHTML = `
                 <tr>
@@ -775,24 +678,24 @@
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
 
-            // Prepare the API call based on report type
+            // Prepare the API call based on period type
             let params = new URLSearchParams();
 
-            // If both start and end date are selected, use them instead of report type filters
+            // If both start and end date are selected, use them instead of period type filters
             if (startDate && endDate) {
                 params.append('start_date', startDate);
                 params.append('end_date', endDate);
-                // Still include the report type for reference
-                params.append('type', reportType);
+                // Still include the period type for reference
+                params.append('type', periodType);
             } else {
-                // Otherwise, use the report type specific parameters
-                params.append('type', reportType);
+                // Otherwise, use the period type specific parameters
+                params.append('type', periodType);
 
-                if (reportType === 'daily' && date) {
+                if (periodType === 'daily' && date) {
                     params.append('date', date);
-                } else if (reportType === 'monthly' && month) {
+                } else if (periodType === 'monthly' && month) {
                     params.append('month', month);
-                } else if (reportType === 'yearly' && year) {
+                } else if (periodType === 'yearly' && year) {
                     params.append('year', year);
                 }
             }

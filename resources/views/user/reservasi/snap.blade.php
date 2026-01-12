@@ -41,9 +41,23 @@
             @endif
         </div>
     </main>
+    <!-- Include Midtrans Snap JS -->
+    @if($snapToken && !str_starts_with($snapToken, 'mock_'))
+        @php
+            $midtransUrl = config('midtrans.is_production') ? 'https://app.midtrans.com' : 'https://app.sandbox.midtrans.com';
+        @endphp
+        <script src="{{ $midtransUrl }}/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
+    @endif
+
     <script>
         @if($snapToken && !str_starts_with($snapToken, 'mock_'))
         document.getElementById('pay-button').onclick = function() {
+            // Check if window.snap exists before calling it
+            if (typeof window.snap === 'undefined') {
+                alert('Sistem pembayaran belum sepenuhnya dimuat. Silakan refresh halaman.');
+                return;
+            }
+
             // Show Snap payment popup
             window.snap.pay('{{ $snapToken }}', {
                 onSuccess: function(result) {

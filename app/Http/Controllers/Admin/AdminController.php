@@ -527,25 +527,25 @@ class AdminController extends Controller
 
         // Apply same date filters to top lapangan query
         if ($startDate && $endDate) {
-            $topLapanganQuery->whereBetween('reservasi.tanggal_reservasi_232112', [$startDate, $endDate]);
+            $topLapanganQuery->whereBetween('reservasi_232112.tanggal_reservasi_232112', [$startDate, $endDate]);
         } elseif ($startDate) {
-            $topLapanganQuery->whereDate('reservasi.tanggal_reservasi_232112', '>=', $startDate);
+            $topLapanganQuery->whereDate('reservasi_232112.tanggal_reservasi_232112', '>=', $startDate);
         } elseif ($endDate) {
-            $topLapanganQuery->whereDate('reservasi.tanggal_reservasi_232112', '<=', $endDate);
+            $topLapanganQuery->whereDate('reservasi_232112.tanggal_reservasi_232112', '<=', $endDate);
         } elseif ($periodType !== 'all') {
             switch ($periodType) {
                 case 'daily':
-                    $topLapanganQuery->whereDate('reservasi.tanggal_reservasi_232112', today());
+                    $topLapanganQuery->whereDate('reservasi_232112.tanggal_reservasi_232112', today());
                     break;
                 case 'weekly':
-                    $topLapanganQuery->whereBetween('reservasi.tanggal_reservasi_232112', [now()->startOfWeek(), now()->endOfWeek()]);
+                    $topLapanganQuery->whereBetween('reservasi_232112.tanggal_reservasi_232112', [now()->startOfWeek(), now()->endOfWeek()]);
                     break;
                 case 'monthly':
-                    $topLapanganQuery->whereMonth('reservasi.tanggal_reservasi_232112', now()->month)
-                                     ->whereYear('reservasi.tanggal_reservasi_232112', now()->year);
+                    $topLapanganQuery->whereMonth('reservasi_232112.tanggal_reservasi_232112', now()->month)
+                                     ->whereYear('reservasi_232112.tanggal_reservasi_232112', now()->year);
                     break;
                 case 'yearly':
-                    $topLapanganQuery->whereYear('reservasi.tanggal_reservasi_232112', now()->year);
+                    $topLapanganQuery->whereYear('reservasi_232112.tanggal_reservasi_232112', now()->year);
                     break;
             }
         }
@@ -991,6 +991,9 @@ class AdminController extends Controller
                 case 'daily':
                     $result = $this->getDailyReport($date, $startDate, $endDate);
                     break;
+                case 'weekly':
+                    $result = $this->getWeeklyReport($startDate, $endDate);
+                    break;
                 case 'monthly':
                     $result = $this->getMonthlyReport($month, $startDate, $endDate);
                     break;
@@ -1099,6 +1102,76 @@ class AdminController extends Controller
             'chartData' => [
                 'labels' => array_column($chartData, 'label'),
                 'income_data' => array_column($chartData, 'income')
+            ]
+        ];
+    }
+
+    private function getWeeklyReport($startDate = null, $endDate = null)
+    {
+        // If no date range is provided, use the current week
+        if (!$startDate && !$endDate) {
+            $startDate = now()->startOfWeek()->format('Y-m-d');
+            $endDate = now()->endOfWeek()->format('Y-m-d');
+        } elseif (!$startDate) {
+            // If only endDate is provided, calculate start of week for that date
+            $endDateCarbon = \Carbon\Carbon::parse($endDate);
+            $startDate = $endDateCarbon->startOfWeek()->format('Y-m-d');
+        } elseif (!$endDate) {
+            // If only startDate is provided, calculate end of week for that date
+            $startDateCarbon = \Carbon\Carbon::parse($startDate);
+            $endDate = $startDateCarbon->endOfWeek()->format('Y-m-d');
+        }
+
+        // Get reservations within the date range
+        $reservasiQuery = Reservasi::whereBetween('tanggal_reservasi_232112', [$startDate, $endDate]);
+
+        // Calculate stats for the week
+        $totalReservasi = $reservasiQuery->count();
+        $totalIncome = $reservasiQuery->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+            ->sum('total_harga_232112');
+
+        // Calculate daily average for the week
+        $startWeek = \Carbon\Carbon::parse($startDate);
+        $endWeek = \Carbon\Carbon::parse($endDate);
+        $daysInWeek = $startWeek->diffInDays($endWeek) + 1;
+        $dailyAvg = $daysInWeek > 0 ? $totalReservasi / $daysInWeek : 0;
+
+        // Find peak day of the week
+        $dailyStats = [];
+        $peakDayIncome = 0;
+        $peakDay = '';
+
+        $current = $startWeek->copy();
+        while ($current->lessThanOrEqualTo($endWeek)) {
+            $currentDate = $current->copy();
+            $dayIncome = Reservasi::whereDate('tanggal_reservasi_232112', $currentDate)
+                ->whereIn('status_reservasi_232112', ['confirmed', 'completed'])
+                ->sum('total_harga_232112');
+
+            $dailyStats[] = [
+                'day' => $currentDate->format('D'),
+                'date' => $currentDate->format('d M'),
+                'income' => $dayIncome
+            ];
+
+            if ($dayIncome > $peakDayIncome) {
+                $peakDayIncome = $dayIncome;
+                $peakDay = $currentDate->format('D, d F Y');
+            }
+
+            $current->addDay();
+        }
+
+        return [
+            'stats' => [
+                'income' => $totalIncome,
+                'reservations' => $totalReservasi,
+                'daily_avg' => round($dailyAvg, 1),
+                'peak_day' => $peakDay
+            ],
+            'chartData' => [
+                'labels' => array_column($dailyStats, 'date'), // Use formatted date
+                'income_data' => array_column($dailyStats, 'income')
             ]
         ];
     }
