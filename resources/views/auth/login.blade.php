@@ -37,12 +37,12 @@
             <form method="POST" action="{{ route('login') }}">
                 @csrf
                 
-                <!-- Email -->
+                <!-- Email or Phone -->
                 <div class="mb-6">
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                    <input type="email" name="email" id="email" required
+                    <label for="login" class="block text-sm font-medium text-gray-700 mb-2">Email atau Nomor Telepon</label>
+                    <input type="text" name="login" id="login" required
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                        placeholder="nama@email.com" value="{{ old('email') }}">
+                        placeholder="nama@email.com atau nomor telepon" value="{{ old('login') }}">
                 </div>
 
                 <!-- Password -->

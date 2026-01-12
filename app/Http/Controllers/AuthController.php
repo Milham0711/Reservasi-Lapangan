@@ -19,12 +19,26 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        $loginField = $request->login;
 
-        $user = User::where('email_232112', $request->email)->first();
+        // Validate based on whether it's an email or phone number
+        if (filter_var($loginField, FILTER_VALIDATE_EMAIL)) {
+            // It's an email
+            $request->validate([
+                'login' => 'required|email',
+                'password' => 'required',
+            ]);
+            $field = 'email_232112';
+        } else {
+            // It's a phone number, validate phone number format
+            $request->validate([
+                'login' => 'required|string|regex:/^[0-9+\-\s\(\)]{10,15}$/',
+                'password' => 'required',
+            ]);
+            $field = 'telepon_232112';
+        }
+
+        $user = User::where($field, $loginField)->first();
 
         if ($user && Hash::check($request->password, $user->password_232112)) {
             Auth::login($user);
@@ -37,8 +51,8 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'Email atau password salah.',
-        ])->onlyInput('email');
+            'login' => 'Email atau nomor telepon atau password salah.',
+        ])->onlyInput('login');
     }
 
     public function showRegister()
