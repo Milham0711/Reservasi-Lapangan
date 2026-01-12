@@ -46,6 +46,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/report/export/pdf', [AdminController::class, 'exportPdf'])->name('report.export.pdf');
     Route::post('/report/preview/pdf', [AdminController::class, 'previewPdf'])->name('report.preview.pdf');
 
+    // Daily, Monthly, Yearly Reports
+    Route::get('/reports', [AdminController::class, 'reportsSummary'])->name('reports.summary');
+    Route::get('/reports/daily', [AdminController::class, 'reportsDaily'])->name('reports.daily');
+    Route::get('/reports/monthly', [AdminController::class, 'reportsMonthly'])->name('reports.monthly');
+    Route::get('/reports/yearly', [AdminController::class, 'reportsYearly'])->name('reports.yearly');
+    Route::get('/reports/fetch', [AdminController::class, 'reportsFetch'])->name('reports.fetch');
+    Route::post('/reports/export/{type}', [AdminController::class, 'reportsExport'])->name('reports.export');
+    Route::post('/reports/export-pdf/{type}', [AdminController::class, 'reportsExportPdf'])->name('reports.export.pdf');
+    Route::get('/reports/detailed-data', [AdminController::class, 'detailedReportData'])->name('reports.detailed.data');
+
     // User Management
     Route::get('/users', [AdminController::class, 'usersIndex'])->name('users.index');
     Route::get('/users/create', [AdminController::class, 'usersCreate'])->name('users.create');
