@@ -13,7 +13,7 @@
         <!-- Sidebar -->
         <aside class="w-64 bg-white min-h-screen shadow-lg flex flex-col sticky top-0 h-screen">
             <div class="p-4 border-b border-gray-200">
-                <h1 class="text-xl font-bold text-blue-600 text-center">SportVenue</h1>
+                <h1 class="text-xl font-bold text-blue-600 text-center">Talapas SportVenue</h1>
                 <h1 class="ml-3 px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full text-center">{{ Auth::user()->nama_232112 }}</h1>
             </div>
             <nav class="p-4">

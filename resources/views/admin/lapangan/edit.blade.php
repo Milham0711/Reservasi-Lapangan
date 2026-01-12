@@ -12,7 +12,7 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
-                    <span class="text-2xl font-bold text-blue-600">SportVenue</span>
+                    <span class="text-2xl font-bold text-blue-600">Talapas SportVenue</span>
                     <span class="ml-3 px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">Admin</span>
                 </div>
                 <div class="flex items-center space-x-4">

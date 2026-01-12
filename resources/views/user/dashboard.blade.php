@@ -14,10 +14,10 @@
         <div class="mb-8">
             <div class="relative overflow-hidden rounded-2xl shadow-lg">
                 <!-- Slider Container -->
-                <div class="relative h-80 md:h-[450px] lg:h-[520px] overflow-hidden">
+                <div class="relative h-80 md:h-[450px] lg:h-[670px] overflow-hidden">
                     <div class="absolute inset-0 flex transition-transform duration-500 ease-in-out" id="slider-container">
                         <div class="w-full h-full flex-shrink-0">
-                            <img src="https://gelora-public-storage.s3-ap-southeast-1.amazonaws.com/upload/public-20240624104756.jpg" 
+                            <img src="https://isibangunan.com/wp-content/uploads/2017/12/palau-blaugrana-scaled.jpg" 
                                 alt="Sport Facility 1" class="w-full h-full object-cover">
                         </div>
                         <div class="w-full h-full flex-shrink-0">

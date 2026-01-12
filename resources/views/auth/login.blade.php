@@ -12,14 +12,18 @@
         <div class="bg-white rounded-2xl shadow-2xl p-8">
             <!-- Logo/Header -->
             <div class="text-center mb-8">
-                <div class="inline-block p-3 bg-blue-100 rounded-full mb-4">
-                    <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
-                    </svg>
-                </div>
-                <h2 class="text-3xl font-bold text-gray-800">SportVenue</h2>
-                <p class="text-gray-600 mt-2">Masuk ke akun Anda</p>
-            </div>
+    <div class="flex justify-center mb-4">
+        <div class="w-24 h-24 rounded-full overflow-hidden bg-white shadow-md">
+            <img 
+                src="{{ asset('images/logo/logo-talapas.png') }}"
+                alt="Talapas SportVenue"
+                class="w-full h-full object-cover" >
+        </div>
+    </div>
+    <h2 class="text-3xl font-bold text-gray-800">Talapas SportVenue</h2>
+    <p class="text-gray-600 mt-2">Masuk ke akun Anda</p>
+</div>
+
 
             <!-- Error Messages -->
             @if ($errors->any())
@@ -37,12 +41,12 @@
             <form method="POST" action="{{ route('login') }}">
                 @csrf
                 
-                 <!-- Email or Phone -->
+                <!-- Email or Phone -->
                 <div class="mb-6">
                     <label for="login" class="block text-sm font-medium text-gray-700 mb-2">Email atau Nomor Telepon</label>
                     <input type="text" name="login" id="login" required
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                        placeholder="nama@email.com atau nomor telepon" value="{{ old('login') }}">
+                        placeholder="email atau nomor telepon" value="{{ old('login') }}">
                 </div>
 
                 <!-- Password -->
@@ -59,7 +63,7 @@
                         <input type="checkbox" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                         <span class="ml-2 text-sm text-gray-600">Ingat saya</span>
                     </label>
-                    <a href="#" class="text-sm text-blue-600 hover:text-blue-700">Lupa password?</a>
+                    <a href="{{ route('password.request') }}" class="text-sm text-blue-600 hover:text-blue-700">Lupa password?</a>
                 </div>
 
                 <!-- Submit Button -->
