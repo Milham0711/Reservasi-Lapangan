@@ -7,30 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-    <!-- Navbar -->
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <span class="text-2xl font-bold text-blue-600">SportVenue</span>
-                    <span class="ml-3 px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">Admin</span>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <span class="text-gray-700">{{ Auth::user()->nama_232112 }}</span>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition">
-                            Logout
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </nav>
-
     <div class="flex">
         <!-- Sidebar -->
-        <aside class="w-64 bg-white min-h-screen shadow-lg">
+        <aside class="w-64 bg-white min-h-screen shadow-lg flex flex-col sticky top-0 h-screen">
+            <div class="p-4 border-b border-gray-200">
+                <h1 class="text-xl font-bold text-blue-600 text-center">SportVenue</h1>
+                <h1 class="ml-3 px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full text-center">{{ Auth::user()->nama_232112 }}</h1>
+            </div>
             <nav class="p-4">
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg mb-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,6 +46,14 @@
                     <span>Laporan</span>
                 </a>
             </nav>
+            <div class="flex items-center justify-center border-t border-gray-200 mt-auto py-4">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition items-center">
+                        Logout
+                    </button>
+                </form>
+            </div>
         </aside>
 
         <!-- Main Content -->

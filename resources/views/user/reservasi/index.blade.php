@@ -4,8 +4,6 @@
 @section('header', 'Reservasi Saya')
 
 @section('content')
-        <!-- Main Content -->
-        <main class="max-w-7xl mx-auto px-4 py-8">
             <div class="mb-8">
                 <h1 class="text-3xl font-bold text-gray-800">Reservasi Saya</h1>
                 <p class="text-gray-600 mt-1">Daftar reservasi yang telah Anda buat</p>
@@ -149,5 +147,4 @@
                     {{ $reservasi->links() }}
                 </div>
             </div>
-        </main>
 @endsection
